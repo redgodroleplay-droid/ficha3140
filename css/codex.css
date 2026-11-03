@@ -183,3 +183,19 @@ body[data-chapter=custom-topic] .topic-menu summary{border-color:#c44950;color:#
 .topic-menu-list .topic-move{padding:4px;text-align:center;min-height:44px;color:#d4a7a2;border:0}
 .topic-menu-list .topic-move:disabled{opacity:.25}
 .topic-row.drop-target{outline:1px solid #dc777a;background:#452326}
+.skill-tree{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;margin:16px 0 30px;align-items:start}
+.skill-map{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:18px 32px;padding:55px 14px 18px;border:1px solid var(--line);background:#100d0dca}
+.skill-trunk{position:absolute;top:8px;left:50%;transform:translateX(-50%);font:30px Georgia,serif;color:#dc9a85}
+.skill-branch{display:grid;gap:8px;align-content:start;position:relative;padding:0 0 0 11px;border-left:1px solid #7a4941}
+.skill-branch h3{margin:0 0 4px;font-size:clamp(19px,2vw,25px);color:#e3c0a8}
+.skill-node{text-align:left;min-height:42px;padding:8px 10px;overflow-wrap:anywhere}
+.skill-node[aria-pressed=true]{background:#53252a;border-color:#b96766;color:#ffe5d7}
+.skill-node.locked:not([aria-pressed=true]){color:#a2958b;border-style:dashed}
+.skill-inspector{max-height:75vh;overflow:auto;scrollbar-width:thin}
+.skill-inspector h3{font-size:clamp(28px,3vw,43px);line-height:1}
+.skill-description{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;margin:14px 0 20px}
+.skill-badge{color:#d6a998;font-size:12px}
+.skill-editor-tools{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.skill-editor-tools input{width:39px;height:35px}
+.skill-inspector textarea{height:190px;resize:vertical}
+@media(max-width:700px){.skill-tree{grid-template-columns:1fr;gap:13px}.skill-inspector{max-height:none}.skill-map{gap:13px;padding-inline:9px}.skill-node{min-height:44px}}

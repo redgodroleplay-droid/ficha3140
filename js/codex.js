@@ -161,22 +161,6 @@ proficiencies.querySelectorAll('[data-skill]').forEach(button => {
   button.onclick = () => roll(button.dataset.skill, mod(state.attrs[Number(button.dataset.attr)]) + Number(state.prof));
 });
 $('#skill-archive').append(proficiencies);
-const progression = $('#progression');
-[...skillCards].sort((a, b) => (a.textContent.includes('NÍVEL 2') ? 1 : 0) - (b.textContent.includes('NÍVEL 2') ? 1 : 0)).forEach(card => {
-  const node = el('button', card.querySelector('h3').textContent);
-  const required = card.textContent.includes('NÍVEL 2') ? 2 : 1;
-  node.append(el('small', required > 1 ? 'A partir do nível ' + required : 'Ficha base'));
-  node.classList.toggle('locked', state.level < required);
-  node.onclick = () => {
-    openTab(techniqueCards.includes(card) ? 'tecnicas' : 'habilidades');
-    card.scrollIntoView({block: 'center'});
-    card.tabIndex = -1;
-    card.focus({preventScroll:true});
-  };
-  progression.append(node);
-  $('#level').addEventListener('input', () => node.classList.toggle('locked', state.level < required));
-});
-
 const diceControls = el('form', undefined, 'dice-controls');
 const diceType = el('select');
 diceType.setAttribute('aria-label', 'Tipo de dado');
