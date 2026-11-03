@@ -1,8 +1,17 @@
 # Lucy — Ficha de Lucifer Adritch
 
-Ficha de RPG com dados locais e exportação/importação JSON.
+Ficha de RPG em HTML, CSS e JavaScript, com armazenamento local, backup JSON e entrada animada.
 
 ## Vercel
-Importe este repositório. Framework Preset: Other. Sem comando de build. Output Directory: . (raiz). Root Directory: raiz do repositório.
 
-Antes de mudar de endereço, exporte sua ficha: cada navegador e endereço possui seu próprio armazenamento local.
+Importe este repositório e selecione **Framework Preset: Other**.
+Use a raiz do repositório como Root Directory, sem comando de build.
+Output Directory: `.` (raiz).
+
+## Dados
+
+Cada navegador salva a própria ficha em localStorage. Use Exportar ficha e Importar ficha para transferir os dados. Exporte antes de mudar de endereço ou limpar os dados do navegador. Os dados de jogo não são enviados ao GitHub ou ao servidor.
+
+## Executar localmente
+
+Abra index.html ou sirva esta pasta com qualquer servidor HTTP estático.
