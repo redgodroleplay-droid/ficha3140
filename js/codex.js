@@ -2,6 +2,7 @@ Object.assign(titles, {
   ficha: ['01 / 概要', 'Visão geral'],
   historia: ['02 / 歴史', 'História'],
   habilidades: ['03 / 技能', 'Habilidades'],
+  skilltree: ['樹 / CAMINHO DA LÂMINA', 'Árvore de habilidades'],
   inventario: ['04 / 装備', 'Inventário'],
   tecnicas: ['05 / 剣技', 'Técnicas'],
   relacoes: ['06 / 関係', 'Relações'],

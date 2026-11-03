@@ -199,3 +199,35 @@ body[data-chapter=custom-topic] .topic-menu summary{border-color:#c44950;color:#
 .skill-editor-tools input{width:39px;height:35px}
 .skill-inspector textarea{height:190px;resize:vertical}
 @media(max-width:700px){.skill-tree{grid-template-columns:1fr;gap:13px}.skill-inspector{max-height:none}.skill-map{gap:13px;padding-inline:9px}.skill-node{min-height:44px}}
+/* Skilltree: katana, ramos e painel de leitura. */
+.skill-tree{display:block}
+.skill-tree.has-inspector{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(245px,1fr)}
+.skill-map{grid-template-columns:minmax(0,1fr) 78px minmax(0,1fr);gap:0;min-height:440px;padding:24px 16px 20px;align-items:start;background:radial-gradient(ellipse at 50% 45%,#27171855,transparent 70%),#100d0d}
+.skill-trunk{position:relative;grid-area:1/2/2/3;transform:none;left:auto;top:auto;align-self:stretch;display:grid;place-items:center;color:#d7b898}
+.skill-trunk svg{width:100%;height:300px}
+.skill-branch{border:0;padding:35px 0 0;gap:0;position:relative;min-width:0}
+.skill-branch[data-branch="0"]{grid-area:1/1/2/2}
+.skill-branch[data-branch="1"]{grid-area:1/3/2/4}
+.skill-branch h3{justify-self:center;text-align:center;margin:0;padding:5px 10px;color:#f1d9c3;background:linear-gradient(90deg,transparent,#68191f 15% 85%,transparent);width:100%}
+.skill-branch[data-branch="0"]::after,.skill-branch[data-branch="1"]::before{content:"";position:absolute;top:76px;width:39px;border-top:1px solid #94765d;pointer-events:none}
+.skill-branch[data-branch="0"]::after{right:-39px}
+.skill-branch[data-branch="1"]::before{left:-39px}
+.skill-branch-nodes{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 3px;padding:19px 0 0;position:relative}
+.skill-branch-nodes::before{content:"";position:absolute;top:9px;left:12%;right:12%;border-top:1px solid #82624e}
+.skill-node,.skill-node[aria-pressed=true]{position:relative;display:grid;justify-items:center;align-content:start;gap:7px;text-align:center;flex:1 1 65px;max-width:104px;padding:0 2px 8px;border:0;background:transparent}
+.skill-orb{display:grid;place-items:center;width:clamp(35px,5vw,63px);aspect-ratio:1;border-radius:50%;border:1px solid #b89475;background:#1b1514;color:#ebcdb0;font:clamp(19px,2.5vw,30px) Georgia,serif;transition:background .16s,border-color .16s}
+.skill-orb::before{content:"";position:absolute;top:-10px;left:50%;height:10px;border-left:1px solid #82624e}
+.skill-node-label{font-size:11px;line-height:1.3;overflow-wrap:anywhere}
+.skill-node:hover .skill-orb,.skill-node[aria-pressed=true] .skill-orb{background:#732b32;border-color:#e6a4a1;color:#fff1de}
+.skill-node.locked:not([aria-pressed=true]) .skill-orb{border-style:dashed;color:#aca094;background:#171414}
+.skill-branch[data-branch="2"],.skill-branch[data-branch="3"]{grid-column:1/-1;padding:0;margin-top:12px}
+.skill-branch[data-branch="2"] h3{width:min(100%,285px)}
+.skill-branch[data-branch="2"]::before{content:"";position:absolute;left:50%;top:-24px;height:25px;border-left:2px dotted #b74950}
+.skill-branch[data-branch="2"] .skill-branch-nodes::before{display:none}
+.skill-branch[data-branch="3"]{margin-top:18px}
+.skill-inspector{position:relative}
+.skill-inspector[hidden]{display:none}
+.skill-inspector .eyebrow{padding-right:36px}
+.skill-close{position:absolute;top:8px;right:8px;padding:2px 8px;font-size:20px}
+@media(max-width:1000px){.skill-map{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);padding-inline:10px}.skill-branch[data-branch="0"]::after,.skill-branch[data-branch="1"]::before{width:24px}.skill-branch[data-branch="0"]::after{right:-24px}.skill-branch[data-branch="1"]::before{left:-24px}}
+@media(max-width:700px){.skill-tree.has-inspector{grid-template-columns:minmax(0,1fr)}.skill-map{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);min-height:0}.skill-trunk svg{height:220px}.skill-branch{padding-top:18px}.skill-branch h3{font-size:19px}.skill-branch[data-branch="0"]::after,.skill-branch[data-branch="1"]::before{top:53px;width:17px}.skill-branch[data-branch="0"]::after{right:-17px}.skill-branch[data-branch="1"]::before{left:-17px}.skill-node{flex-basis:53px}.skill-node-label{font-size:10px}.skill-inspector{scroll-margin-top:125px}}
