@@ -173,3 +173,13 @@ body[data-chapter=custom-topic] .topic-menu summary{border-color:#c44950;color:#
 .topic-menu-list button+button{border-top:1px solid #493a345e}
 .topic-menu-list button.active{border-left-color:#dd797e;background:#452326}
 @media(max-width:700px){.topic-menu summary{min-height:44px;font-size:11px}}
+.topic-menu summary{border-radius:6px;gap:11px}
+.topic-menu[open] summary{border-color:#b66665;background:#2a191a}
+.topic-menu-list{width:min(350px,calc(100vw - 24px));border-radius:7px}
+.topic-menu-list::before{content:"TÓPICOS · ARRASTE OU USE AS SETAS"}
+.topic-row{display:grid;grid-template-columns:25px minmax(0,1fr) 36px 36px;align-items:center;border-top:1px solid #493a345e}
+.topic-grip{cursor:grab;text-align:center;color:#bf9a8b;font-size:16px}
+.topic-grip:active{cursor:grabbing}
+.topic-menu-list .topic-move{padding:4px;text-align:center;min-height:44px;color:#d4a7a2;border:0}
+.topic-menu-list .topic-move:disabled{opacity:.25}
+.topic-row.drop-target{outline:1px solid #dc777a;background:#452326}

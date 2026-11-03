@@ -33,13 +33,16 @@ function renderPage(){page=Math.max(0,Math.min(page,state.pages.length-1));$('#p
 $('#page-title').oninput=()=>{state.pages[page].title=$('#page-title').value;pageIndex();save()};$('#page-text').oninput=()=>{state.pages[page].text=$('#page-text').value;save()};$('#add-page').onclick=()=>{state.pages.push({title:'Nova página',text:''});page=state.pages.length-1;renderPage();save();$('#page-title').focus()};$('#prev-page').onclick=()=>{page--;renderPage()};$('#next-page').onclick=()=>{page++;renderPage()};$('#delete-page').onclick=()=>{if(state.pages.length<2||!confirm('Excluir esta página do diário?'))return;state.pages.splice(page,1);renderPage();save()};renderPage();
 function renderTopics() {
   const nav = $('nav');
-  nav.querySelectorAll('.custom-nav, .topic-menu').forEach(element => element.remove());
+  const wasOpen = Boolean($('.topic-menu[open]'));
+  nav.parentElement.querySelectorAll('.custom-nav, .topic-menu').forEach(element => element.remove());
+  let draggedIndex = null;
   const useMenu = state.topics.length >= 3;
   const menu = useMenu ? el('details', undefined, 'topic-menu') : null;
   const group = menu ? el('div', undefined, 'topic-menu-list') : nav;
   if (menu) {
     menu.append(el('summary', 'Mais tópicos (' + state.topics.length + ')'), group);
     nav.after(menu);
+    menu.open = wasOpen;
     menu.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return;
       menu.open = false;
@@ -61,10 +64,62 @@ function renderTopics() {
         menu.querySelector('summary').focus();
       }
     };
-    group.append(button);
+    if (!menu) {
+      group.append(button);
+      return;
+    }
+    const row = el('div', undefined, 'topic-row');
+    const handle = el('span', '⠿', 'topic-grip');
+    handle.draggable = true;
+    handle.setAttribute('aria-hidden', 'true');
+    handle.title = 'Arrastar para reordenar';
+    function moveTo(target, direction) {
+      const selected = state.topics[topic];
+      state.topics.splice(index, 1);
+      state.topics.splice(target, 0, entry);
+      topic = state.topics.indexOf(selected);
+      save();
+      renderTopics();
+      const moved = $('.topic-menu-list').children[target];
+      const control = direction && moved.querySelector('[data-move="' + direction + '"]:not(:disabled)');
+      (control || moved.querySelector('.custom-nav')).focus();
+    }
+    handle.ondragstart = event => {
+      draggedIndex = index;
+      event.dataTransfer.setData('text/plain', String(index));
+      event.dataTransfer.effectAllowed = 'move';
+    };
+    handle.ondragend = () => {
+      draggedIndex = null;
+      group.querySelectorAll('.drop-target').forEach(target => target.classList.remove('drop-target'));
+    };
+    row.ondragover = event => {
+      if (draggedIndex === null || draggedIndex === index) return;
+      event.preventDefault();
+      row.classList.add('drop-target');
+    };
+    row.ondragleave = event => {
+      if (!row.contains(event.relatedTarget)) row.classList.remove('drop-target');
+    };
+    row.ondrop = event => {
+      if (draggedIndex === null) return;
+      event.preventDefault();
+      group.children[draggedIndex]?.moveTopic(index);
+    };
+    row.moveTopic = moveTo;
+    row.append(handle, button);
+    for (const [offset, symbol, direction] of [[-1, '↑', 'subir'], [1, '↓', 'descer']]) {
+      const arrow = el('button', symbol, 'topic-move');
+      arrow.dataset.move = direction;
+      arrow.setAttribute('aria-label', direction + ' ' + button.textContent);
+      arrow.disabled = index + offset < 0 || index + offset >= state.topics.length;
+      arrow.onclick = () => moveTo(index + offset, direction);
+      row.append(arrow);
+    }
+    group.append(row);
   });
 }
-$('#add-topic').onclick=()=>{const title=prompt('Nome do novo tópico (ex.: Missões, Aliados, Magias):');if(!title?.trim())return;state.topics.push({title:title.trim(),text:''});save();renderTopics();document.querySelector('.custom-nav:last-child').click()};$('#topic-title').oninput=()=>{state.topics[topic].title=$('#topic-title').value;$('#section-name').textContent=$('#topic-title').value;renderTopics();document.querySelectorAll('.custom-nav')[topic]?.classList.add('active');save()};$('#topic-body').oninput=()=>{state.topics[topic].text=$('#topic-body').value;save()};$('#rename-topic').onclick=()=>{$('#topic-title').focus();$('#topic-title').select()};$('#delete-topic').onclick=()=>{if(!confirm('Excluir este tópico e seu conteúdo?'))return;state.topics.splice(topic,1);save();renderTopics();openTab('ficha')};renderTopics();
+$('#add-topic').onclick=()=>{const title=prompt('Nome do novo tópico (ex.: Missões, Aliados, Magias):');if(!title?.trim())return;state.topics.push({title:title.trim(),text:''});save();renderTopics();[...document.querySelectorAll('.custom-nav')].at(-1).click()};$('#topic-title').oninput=()=>{state.topics[topic].title=$('#topic-title').value;$('#section-name').textContent=$('#topic-title').value;renderTopics();document.querySelectorAll('.custom-nav')[topic]?.classList.add('active');save()};$('#topic-body').oninput=()=>{state.topics[topic].text=$('#topic-body').value;save()};$('#rename-topic').onclick=()=>{$('#topic-title').focus();$('#topic-title').select()};$('#delete-topic').onclick=()=>{if(!confirm('Excluir este tópico e seu conteúdo?'))return;state.topics.splice(topic,1);save();renderTopics();openTab('ficha')};renderTopics();
 function validateBackup(raw){if(!raw||typeof raw!=='object'||Array.isArray(raw))throw Error('Formato inválido.');const data=raw.format==='ronin-ficha'?raw.data:raw;if(raw.format==='ronin-ficha'&&raw.version!==2)throw Error('Versão de arquivo não suportada.');if(!data||!Array.isArray(data.attrs)||data.attrs.length!==6||!data.attrs.every(n=>Number.isFinite(n)&&n>=1&&n<=30)||!Array.isArray(data.items))throw Error('Atributos ou inventário inválidos.');const clean=structuredClone(defaults);for(const k of ['name','nickname','age','height','weight','background','notes','portrait','appearance','race','characterClass','speed'])if(k in data){if(typeof data[k]!=='string')throw Error('Campo inválido: '+k);clean[k]=data[k]}for(const k of ['level','hp','maxhp','defense','prof','gold'])if(k in data){if(!Number.isFinite(data[k]))throw Error('Número inválido: '+k);clean[k]=data[k]}if(clean.maxhp<1||clean.level<1||clean.hp<0||clean.gold<0)throw Error('Vida, nível ou ouro inválido.');for(const k of ['sealed','used'])if(k in data){if(typeof data[k]!=='boolean')throw Error('Estado inválido: '+k);clean[k]=data[k]}if(clean.portrait&&!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(clean.portrait))throw Error('Imagem de retrato inválida.');if(clean.portrait.length>2200000)throw Error('Imagem de retrato muito grande.');clean.attrs=[...data.attrs];clean.items=data.items.map(r=>{if(!Array.isArray(r)||typeof r[0]!=='string'||!Number.isFinite(r[1])||r[1]<0)throw Error('Item inválido.');const meta=r[2];return meta&&typeof meta==='object'?[r[0],r[1],Object.fromEntries(Object.entries(meta).filter(([k,v])=>['category','weight','damage','properties','description','notes','equipped'].includes(k)&&(k==='equipped'?typeof v==='boolean':typeof v==='string')))]:[r[0],r[1]]});for(const k of ['customAbilities','beastEntries','topics','pages','lore','relations'])if(k in data){if(!Array.isArray(data[k]))throw Error('Coleção inválida: '+k);clean[k]=data[k].map(r=>{if(!r||typeof r.title!=='string'||typeof r.text!=='string'||(['customAbilities','beastEntries'].includes(k)&&typeof r.category!=='string'))throw Error('Registro inválido em '+k);return {title:r.title,text:r.text,...Object.fromEntries(['category','date','subtitle','status','history','requirements','cost','range','damage'].filter(field=>typeof r[field]==='string').map(field=>[field,r[field]]))}})}if(clean.name==='Lucy')clean.name='Lucifer Adritch';if(!clean.pages.length)clean.pages=[{title:'O início do caminho',text:clean.notes||''}];return clean}
 $('#export').onclick=()=>{const backup={format:'ronin-ficha',version:2,exportedAt:new Date().toISOString(),data:state},blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download='lucifer-adritch-ficha-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 $('#import').onclick=()=>$('#import-file').click();$('#import-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5*1024*1024)throw Error('O arquivo deve ter até 5 MB.');const next=validateBackup(JSON.parse(await file.text()));if(!confirm('Importar a ficha de '+next.name+'? Isso substituirá os dados deste navegador. Exporte a ficha atual antes se quiser preservá-la.'))return;localStorage.setItem(key,JSON.stringify(next));location.reload()}catch(error){alert('Não foi possível importar. '+error.message)}finally{e.target.value=''}};
