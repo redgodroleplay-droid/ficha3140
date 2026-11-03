@@ -231,3 +231,12 @@ body[data-chapter=custom-topic] .topic-menu summary{border-color:#c44950;color:#
 .skill-close{position:absolute;top:8px;right:8px;padding:2px 8px;font-size:20px}
 @media(max-width:1000px){.skill-map{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);padding-inline:10px}.skill-branch[data-branch="0"]::after,.skill-branch[data-branch="1"]::before{width:24px}.skill-branch[data-branch="0"]::after{right:-24px}.skill-branch[data-branch="1"]::before{left:-24px}}
 @media(max-width:700px){.skill-tree.has-inspector{grid-template-columns:minmax(0,1fr)}.skill-map{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);min-height:0}.skill-trunk svg{height:220px}.skill-branch{padding-top:18px}.skill-branch h3{font-size:19px}.skill-branch[data-branch="0"]::after,.skill-branch[data-branch="1"]::before{top:53px;width:17px}.skill-branch[data-branch="0"]::after{right:-17px}.skill-branch[data-branch="1"]::before{left:-17px}.skill-node{flex-basis:53px}.skill-node-label{font-size:10px}.skill-inspector{scroll-margin-top:125px}}
+.combustion{border:1px solid #784644;background:#211616;margin:15px 0;padding:11px;overflow-wrap:anywhere}
+.combustion summary{cursor:pointer;color:#f4c0a5;font-weight:600}
+.combustion>p,.combustion details p{font-size:12px;line-height:1.45}
+.combustion-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:9px}
+.combustion-form label{display:grid;align-content:end;gap:3px;font-size:11px}
+.combustion-form input,.combustion-form select{width:100%;min-height:36px;padding:5px;border:1px solid var(--line);background:#171111}
+.combustion-actions{grid-column:1/-1}
+.combustion-result dt{font-weight:bold;color:#f4c0a5;font-size:12px;margin-top:8px}
+.combustion-result dd{margin:2px 0;font-size:12px;line-height:1.5}

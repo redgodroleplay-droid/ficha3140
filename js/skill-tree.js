@@ -62,6 +62,8 @@
     if (item.required > state.level) inspector.append(el('p', 'Requer nível ' + item.required, 'skill-badge'));
     const preview = el('div', undefined, 'skill-description');
     appendColoredText(preview, item.entry);
+    const isCombustion = item.entry.title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase() === 'combustao absoluta';
+    if (isCombustion && !editing) inspector.append(createCombustionCalculator());
     inspector.append(preview);
     for (const [key, label] of [['requirements','Requisitos'], ['cost','Custo'], ['range','Alcance'], ['damage','Dano'], ['status','Disponibilidade']]) {
       if (item.entry[key]) inspector.append(el('p', label + ' · ' + item.entry[key], 'skill-badge'));
