@@ -1,0 +1,87 @@
+/* ===== Temas por estado ===== */
+.mood-layer,.mood-vignette,.mood-embers{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .9s var(--ease)}
+.mood-layer{z-index:-1}
+.mood-vignette{z-index:40}
+.mood-embers{z-index:41;overflow:hidden}
+
+/* ---------- Selo aberto: magma ---------- */
+body.mood-seal{--shu:#ff5a1f;--shu-hi:#ff9a5c;--shu-deep:#a32a08;--kin:#ffb347;--kin-dim:#a8682a;--line:#4a2a1c;--line-2:#6a3a22}
+.mood-seal .mood-layer{opacity:1;background:
+  radial-gradient(ellipse 120% 55% at 50% 110%,#ff4a0a40,transparent 60%),
+  radial-gradient(ellipse 60% 40% at 15% 100%,#ff7a1a26,transparent 70%),
+  radial-gradient(ellipse 50% 35% at 90% 100%,#c0200a30,transparent 70%)}
+.mood-seal .mood-embers{opacity:1}
+.mood-embers i{position:absolute;left:var(--x);bottom:-12px;width:var(--size);height:var(--size);border-radius:50%;
+  background:radial-gradient(circle,#fff3c4,#ffb347 40%,#ff4a0a 70%,transparent);box-shadow:0 0 8px #ff6a1a;opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  .mood-seal .mood-embers i{animation:ember-rise var(--time) linear var(--delay) infinite}
+}
+@keyframes ember-rise{
+  0%{transform:translate(0,0) scale(1);opacity:0}
+  10%{opacity:.95}
+  70%{opacity:.7}
+  100%{transform:translate(var(--drift),-105vh) scale(.3);opacity:0}
+}
+.effects-off .mood-embers{display:none}
+.mood-seal .card{border-color:#ff5a1f40;box-shadow:0 1px 0 #ffffff08 inset,0 14px 34px #0007,0 0 26px #ff3d0014}
+.mood-seal .card::before{background:linear-gradient(90deg,#ff3d00,#ffb347 40%,transparent 85%)}
+.mood-seal .masthead::after{background:linear-gradient(90deg,transparent,#ff5a1f,#ffb347,#ff5a1f,transparent)!important;box-shadow:0 0 18px #ff5a1f}
+.mood-seal .identity h1{background:linear-gradient(180deg,#fff2d6 20%,#ffb347 70%,#ff5a1f);-webkit-background-clip:text;background-clip:text;text-shadow:none}
+.mood-seal .identity::after{-webkit-text-stroke-color:#ff5a1f66}
+.mood-seal .crest-cloth{background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 4px),radial-gradient(ellipse at 50% 60%,#ff4a0a55,transparent 65%),linear-gradient(100deg,#2a120a,#140906 50%,#2c1208)}
+.mood-seal .crest-mark{color:#ff6a1a;filter:drop-shadow(0 0 16px #ff4a0a)}
+@media (prefers-reduced-motion:no-preference){
+  .mood-seal .crest-mark{animation:magma-breathe 3.2s ease-in-out infinite}
+  .mood-seal .beast-panel{animation:magma-breathe 3.2s ease-in-out infinite}
+}
+@keyframes magma-breathe{50%{filter:drop-shadow(0 0 28px #ff4a0a) brightness(1.15)}}
+.mood-seal #seal-toggle{background:#ff5a1f;border-color:#ff5a1f;color:#fff;box-shadow:0 0 22px #ff5a1f88}
+
+/* ---------- PV crítico ---------- */
+.mood-critical .mood-vignette{opacity:1;box-shadow:inset 0 0 120px 30px #c0101066,inset 0 0 40px 6px #ff2a1a40}
+@media (prefers-reduced-motion:no-preference){
+  .mood-critical .mood-vignette{animation:heartbeat 1.3s ease-in-out infinite}
+}
+@keyframes heartbeat{0%,100%{opacity:.55}14%{opacity:1}28%{opacity:.6}42%{opacity:.95}}
+.mood-critical .health{border-color:#e8432c99;box-shadow:0 0 30px #e8432c33}
+
+/* ---------- Inconsciente (0 PV) ---------- */
+.mood-downed main{filter:grayscale(.75) brightness(.8);transition:filter .9s var(--ease)}
+.mood-downed .mood-vignette{opacity:1;box-shadow:inset 0 0 160px 60px #000c}
+.mood-downed .health{filter:none}
+
+/* ---------- Maldição dominante ---------- */
+body.mood-cursed{--mood-aura:#b43cff}
+.mood-cursed .mood-layer{opacity:1;background:radial-gradient(ellipse 80% 60% at 85% 0%,color-mix(in srgb,var(--mood-aura) 26%,transparent),transparent 65%),radial-gradient(ellipse 60% 50% at 0% 100%,color-mix(in srgb,var(--mood-aura) 18%,transparent),transparent 70%)}
+.mood-seal.mood-cursed .mood-layer{background:radial-gradient(ellipse 120% 55% at 50% 110%,#ff4a0a40,transparent 60%),radial-gradient(ellipse 80% 60% at 85% 0%,color-mix(in srgb,var(--mood-aura) 24%,transparent),transparent 65%)}
+.mood-cursed .masthead::after{box-shadow:0 0 18px var(--mood-aura)}
+.mood-cursed .identity::after{-webkit-text-stroke-color:color-mix(in srgb,var(--mood-aura) 50%,transparent)}
+
+/* ---------- Faixa de estados ---------- */
+.mood-banner{position:fixed;left:16px;bottom:18px;z-index:60;display:flex;flex-direction:column;align-items:flex-start;gap:6px;max-width:calc(100vw - 150px)}
+.mood-banner[hidden]{display:none}
+.mood-chip{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:4px 14px 4px 6px;border-radius:20px;font-size:12px;background:#120d0de6;backdrop-filter:blur(6px);box-shadow:0 6px 18px #0009}
+.mood-chip b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:700 13px var(--jp);color:#fff}
+.mood-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mood-chip.seal{border-color:#ff5a1f}
+.mood-chip.seal b{background:#ff5a1f;box-shadow:0 0 12px #ff5a1f}
+.mood-chip.critical{border-color:#e8432c}
+.mood-chip.critical b{background:#c0101a}
+.mood-chip.downed{border-color:#777}
+.mood-chip.downed b{background:#333}
+.mood-chip.cursed{border-color:var(--mood-aura)}
+.mood-chip.cursed b{background:var(--mood-aura);box-shadow:0 0 12px var(--mood-aura)}
+@media (prefers-reduced-motion:no-preference){
+  .mood-chip{animation:chip-in .5s var(--ease)}
+}
+@keyframes chip-in{from{transform:translateY(10px);opacity:0}}
+/* menu "Mais tópicos": no celular abre ancorado à tela, sem cortar à esquerda */
+@media (max-width:760px){
+  .topic-menu-list{position:fixed;left:12px;right:12px;top:58px;width:auto}
+}
+@media (max-width:620px){
+  .mood-banner{flex-direction:row;bottom:24px}
+  .mood-chip{padding:4px}
+  .mood-chip span{display:none}
+}
+@media print{.mood-layer,.mood-vignette,.mood-embers,.mood-banner{display:none!important}.mood-downed main{filter:none}}

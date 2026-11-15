@@ -1,0 +1,72 @@
+/* ===== Relações com aparência e Familiares ===== */
+:root{--familiar:#3fb6a8}
+
+/* retrato */
+.portrait-box{display:grid;gap:8px;justify-items:center;align-content:start}
+.portrait-frame{display:grid;place-items:center;width:112px;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--kin-dim);border-radius:3px;background:linear-gradient(160deg,#241c1a,#0d0a0a);box-shadow:inset 0 0 0 4px #0c0909,0 8px 18px #0008}
+.portrait-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.portrait-initial{font:600 46px var(--serif);color:var(--kin-dim)}
+.portrait-tools{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:150px}
+.portrait-tools button{min-height:28px;padding:3px 8px;font-size:11px}
+
+/* relações */
+.relations-heading{margin-right:auto}
+.toolbar p.eyebrow{margin:0 0 6px;color:var(--shu-hi);font:600 11px/1.4 var(--sans);font-style:normal;letter-spacing:.24em}
+.relations-heading h3,.familiar-area .toolbar h3{margin:0}
+.relation-card{display:grid;gap:12px}
+.relation-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.relation-id{display:grid;gap:10px}
+.relation-card .editor-label,.familiar-card .editor-label{display:grid;gap:4px;color:var(--ash);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+.relation-card .editor-label input,.relation-card .editor-label textarea,.familiar-card .editor-label input,.familiar-card .editor-label textarea{color:var(--washi);font-size:14px;letter-spacing:0;text-transform:none}
+.relation-card .editor-label textarea,.familiar-card .editor-label textarea{height:110px}
+.relation-id .editor-label:first-child input{font:600 22px var(--serif)}
+.appearance-field textarea{font-style:italic}
+
+/* familiares */
+.familiar-area{margin:26px 0 34px}
+.familiar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,480px),1fr));gap:16px}
+.familiar-card{display:grid;gap:16px;border-color:color-mix(in srgb,var(--familiar) 30%,var(--line));
+  background:radial-gradient(ellipse 80% 50% at 0% 0%,color-mix(in srgb,var(--familiar) 14%,transparent),transparent 70%),linear-gradient(160deg,#151a19f2,#0d0f0ff2)}
+.familiar-card::before{background:linear-gradient(90deg,var(--familiar),var(--kin) 40%,transparent 85%)}
+.familiar-card.summoned{box-shadow:0 0 0 1px color-mix(in srgb,var(--familiar) 55%,transparent),0 14px 40px color-mix(in srgb,var(--familiar) 22%,#0008)}
+.familiar-card .portrait-frame{border-color:color-mix(in srgb,var(--familiar) 50%,var(--line))}
+.familiar-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.familiar-id{display:grid;gap:6px;align-content:start}
+.familiar-name{font:600 clamp(26px,2.6vw,34px)/1.1 var(--serif);border-bottom-color:transparent!important}
+.familiar-name:focus{border-bottom-color:var(--familiar)!important}
+.familiar-species{color:var(--washi-2);font:italic 500 17px var(--serif);border-bottom-color:transparent!important}
+.summon-toggle{justify-self:start;margin-top:6px;font-size:12px;border-radius:20px}
+.summon-toggle[aria-pressed=true]{border-color:var(--familiar);background:color-mix(in srgb,var(--familiar) 22%,#101413);color:#fff}
+
+.familiar-vitals{display:grid;gap:10px}
+.familiar-bar{background:#14302c}
+.familiar-bar i{background:linear-gradient(90deg,color-mix(in srgb,var(--familiar) 45%,#000),var(--familiar) 60%,color-mix(in srgb,var(--familiar) 60%,#fff));box-shadow:0 0 12px color-mix(in srgb,var(--familiar) 55%,transparent)}
+.familiar-hp-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.familiar-hp{margin-right:auto;font:600 20px var(--serif);color:var(--washi)}
+.familiar-hp-row input{width:56px;min-height:34px;padding:4px;border:1px solid var(--line-2);border-radius:2px;background:#0d0a0a;text-align:center}
+.familiar-hp-row button{min-height:34px;padding:5px 12px;font-size:12.5px}
+.familiar-stats{display:grid;grid-template-columns:repeat(3,70px) minmax(0,1fr);gap:12px}
+.fam-stat{display:grid;gap:4px;color:var(--ash);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+.fam-stat input{font:600 20px var(--serif);color:var(--washi);text-align:center;letter-spacing:0}
+.fam-stat.editor-label input{text-align:left;font:500 14px var(--sans)}
+
+.familiar-attrs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.fam-attr{display:grid;justify-items:center;gap:2px;padding:8px 4px;border:1px solid var(--line);border-radius:3px;background:#0a0b0b99}
+.fam-attr span{color:var(--ash);font-size:10px;letter-spacing:.16em}
+.fam-attr input{width:100%;text-align:center;font:600 20px var(--serif);border-bottom-color:transparent}
+.fam-attr button{min-height:26px;padding:2px 8px;font-size:11.5px;border-radius:20px}
+.familiar-combat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.familiar-texts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.familiar-texts>.editor-label:first-child{grid-column:1/-1}
+.familiar-card .toolbar{margin:0}
+
+@media (max-width:620px){
+  .familiar-attrs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .familiar-combat,.familiar-texts{grid-template-columns:1fr}
+  .familiar-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .familiar-stats .editor-label{grid-column:1/-1}
+}
+@media (max-width:420px){
+  .relation-top,.familiar-head{grid-template-columns:1fr;justify-items:start}
+  .portrait-box{justify-items:start}
+}

@@ -1,0 +1,171 @@
+/* ===== Arsenal: mana, recursos, armas amaldiçoadas, personalização ===== */
+:root{--mana:#5b7cff;--mana-hi:#a9b8ff;--curse:#b43cff}
+
+/* ---------- Grade superior: Vida + Mana + 3 atributos ---------- */
+.top-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+.top-grid>.health,.top-grid>.mana-card{grid-column:span 3}
+.top-grid>.stat{grid-column:span 2}
+
+.mana-card{background:linear-gradient(160deg,#141a33f2,#0d0e16f2)}
+.mana-card::before{background:linear-gradient(90deg,var(--mana),var(--kin) 35%,transparent 80%)}
+.mana-card .card-label>span{color:var(--mana-hi)}
+.mana-value small{color:var(--mana-hi)!important}
+.mana-bar{background:#1a1f3a}
+.mana-bar i{background:linear-gradient(90deg,color-mix(in srgb,var(--mana) 45%,#000),var(--mana) 60%,var(--mana-hi));box-shadow:0 0 14px color-mix(in srgb,var(--mana) 60%,transparent)}
+.mana-low .mana-bar i{animation:hp-pulse 1.4s ease-in-out infinite}
+.mana-form button:first-of-type:hover{border-color:var(--mana)}
+.session-status:empty{display:none}
+.session-status{margin:8px 0 0;color:var(--washi-2);font-size:12.5px;min-height:1.2em}
+
+.temp-hp{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;color:var(--ash);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.temp-hp input{width:64px;text-align:center;font:600 20px var(--serif);color:var(--kin)}
+.health.has-temp .bar{box-shadow:0 0 0 1px var(--kin),inset 0 1px 3px #000a}
+.health.bloodied .card-label::after{content:"FERIDO";margin-left:auto;margin-right:8px;padding:2px 7px;border:1px solid var(--shu);color:var(--shu-hi);font-size:9.5px;letter-spacing:.2em}
+
+/* ---------- Descanso e condições ---------- */
+.table-tools{display:grid;gap:10px;margin:14px 0 0}
+.rest-bar,.condition-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.rest-bar>span,.condition-bar>span{margin-right:4px;color:var(--ash);font-size:10px;letter-spacing:.2em}
+.rest-bar button{min-height:34px;padding:5px 14px;font-size:12.5px;border-radius:20px}
+.rest-option{margin-left:4px;color:var(--ash);font-size:12px}
+.condition{min-height:30px;padding:3px 11px;font-size:12px;border-radius:20px;color:var(--ash)}
+.condition[aria-pressed=true]{background:#e8432c26;border-color:var(--shu);color:#fff}
+.identity-tags .cond-tag{border-color:var(--shu);background:#e8432c1a;color:var(--shu-hi)}
+
+/* ---------- Usos & recargas ---------- */
+.resources-card{margin-top:14px}
+.resource-list{display:grid;gap:4px;margin:10px 0 14px}
+.resource-row{display:grid;grid-template-columns:minmax(120px,1.4fr) auto 46px 58px minmax(110px,auto) 38px;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.resource-row>input:first-child{font-weight:500}
+.resource-count{color:var(--kin);font:600 16px var(--serif);text-align:right}
+.resource-max{text-align:center;font-size:13px}
+.resource-row select{padding:5px 8px;font-size:12px}
+.icon-btn{min-height:32px;padding:0;width:32px}
+.resource-add{display:flex;gap:8px;flex-wrap:wrap}
+.resource-add input:first-child{flex:1;min-width:180px}
+.resource-add input:nth-child(2){width:70px;text-align:center}
+
+/* ---------- Pips ---------- */
+.pips{display:flex;flex-wrap:wrap;gap:5px}
+.pip{width:18px;min-height:18px;height:18px;padding:0;border-radius:50%;border:1px solid var(--kin-dim);background:#0d0a0a}
+.pip.on{background:radial-gradient(circle at 35% 35%,#fff6,transparent 45%),var(--kin);border-color:var(--kin);box-shadow:0 0 8px #d8b36a66}
+.pips.corrupt .pip{border-radius:2px;transform:rotate(45deg);border-color:color-mix(in srgb,var(--aura) 60%,#444)}
+.pips.corrupt .pip.on{background:var(--aura);border-color:var(--aura);box-shadow:0 0 10px var(--aura)}
+.pips.charge .pip.on{background:var(--mana);border-color:var(--mana);box-shadow:0 0 8px var(--mana)}
+
+@media (pointer:coarse){
+  .pips{gap:8px}
+  .pip{width:24px;height:24px;min-height:24px}
+}
+
+/* ---------- Armas amaldiçoadas ---------- */
+.cursed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:16px}
+.cursed{--aura:#9b2c2c;display:grid;gap:16px;overflow:hidden;
+  background:radial-gradient(ellipse 90% 60% at 100% 0%,color-mix(in srgb,var(--aura) 22%,transparent),transparent 70%),linear-gradient(160deg,#1a1416f2,#0e0b0df2);
+  border-color:color-mix(in srgb,var(--aura) 35%,var(--line))}
+.cursed::before{background:linear-gradient(90deg,var(--aura),var(--kin) 40%,transparent 85%)}
+.cursed::after{content:"呪";position:absolute;right:-.08em;bottom:-.22em;z-index:0;pointer-events:none;font:800 200px/1 var(--jp);color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--aura) 30%,transparent)}
+.cursed>*{position:relative;z-index:1}
+.cursed.attuned{box-shadow:0 0 0 1px color-mix(in srgb,var(--aura) 55%,transparent),0 14px 40px color-mix(in srgb,var(--aura) 25%,#0008)}
+.cursed.overrun{animation:curse-throb 2.2s ease-in-out infinite}
+.cursed.pulse{animation:curse-flash .7s var(--ease)}
+@keyframes curse-throb{50%{box-shadow:0 0 0 1px var(--aura),0 0 46px color-mix(in srgb,var(--aura) 55%,transparent)}}
+@keyframes curse-flash{0%{filter:brightness(1.8)}100%{filter:none}}
+
+.cursed-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px}
+.cursed-sigil{width:58px;height:58px;border:1px solid var(--aura)!important;border-radius:3px;background:color-mix(in srgb,var(--aura) 18%,#0a0909);text-align:center;font:800 30px/1 var(--jp);color:#fff;text-shadow:0 0 14px var(--aura);transform:rotate(-4deg)}
+.cursed-titles{display:grid;gap:2px;min-width:0}
+.cursed-name{font:600 clamp(24px,2.4vw,32px)/1.1 var(--serif);border-bottom-color:transparent!important;padding:2px 0}
+.cursed-name:focus{border-bottom-color:var(--aura)!important}
+.cursed-spirit{color:var(--washi-2);font:italic 500 17px var(--serif);border-bottom-color:transparent!important}
+.attune{font-size:12px;border-radius:20px;white-space:nowrap}
+.attune[aria-pressed=true]{border-color:var(--aura);background:color-mix(in srgb,var(--aura) 25%,#140f10);color:#fff}
+
+.cursed-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cursed-combat{display:grid;gap:10px}
+.roll-field{display:flex;align-items:flex-end;gap:8px}
+.roll-field>label{flex:1}
+.roll-field button{min-height:34px;padding:5px 12px;font-size:12.5px;white-space:nowrap}
+.cursed .editor-label{display:grid;gap:4px;color:var(--ash);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+.cursed .editor-label input,.cursed .editor-label select{color:var(--washi);font-size:14px;letter-spacing:0;text-transform:none;padding:6px 0}
+.cursed .editor-label select{padding:6px 8px}
+.cursed .editor-label textarea{height:130px;font-size:14px;letter-spacing:0;text-transform:none;color:var(--washi)}
+
+.cursed-meters{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px;border:1px solid var(--line);border-radius:3px;background:#0a080999}
+.cursed-meter{display:grid;gap:8px;align-content:start}
+.cursed-meter select{font-size:12px;padding:4px 8px;justify-self:start}
+.meter-head{display:flex;align-items:center;gap:8px;color:var(--ash);font-size:10.5px;letter-spacing:.16em}
+.meter-head b{color:var(--washi);font:600 16px var(--serif);letter-spacing:0}
+.meter-max{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:10px}
+.meter-max input{width:34px;text-align:center;font-size:12px}
+.overrun .corrupt .meter-head b{color:var(--aura);text-shadow:0 0 10px var(--aura)}
+
+.cursed-activate{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px}
+.cursed-activate>label:first-child{display:grid;gap:4px;color:var(--ash);font-size:10.5px;letter-spacing:.14em}
+.cursed-activate input[type=number]{width:70px;font:600 18px var(--serif);text-align:center;color:var(--mana-hi)}
+.cursed-activate .preference{color:var(--washi-2);font-size:12.5px}
+.awaken{margin-left:auto;background:var(--aura)!important;border-color:var(--aura)!important;box-shadow:0 0 18px color-mix(in srgb,var(--aura) 45%,transparent)}
+.awaken:hover{filter:brightness(1.15)}
+[data-mana-cost].short{opacity:.55}
+.cursed-status{margin:0}
+.overrun .cursed-status{color:var(--shu-hi);font-weight:600}
+.cursed-texts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cursed-texts .curse textarea{color:#f3c7c0}
+.cursed-more summary{cursor:pointer;color:var(--kin);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.cursed-more[open] summary{margin-bottom:12px}
+.cursed-more .toolbar{margin:12px 0 0}
+.aura-label{display:flex;align-items:center;gap:8px;color:var(--ash);font-size:12px}
+.cursed[data-stage="2"] .cursed-sigil{box-shadow:0 0 18px var(--aura)}
+.cursed[data-stage="3"] .cursed-sigil,.cursed[data-stage="4"] .cursed-sigil{box-shadow:0 0 28px var(--aura),inset 0 0 12px var(--aura)}
+
+/* ---------- Técnicas com mana ---------- */
+.mana-cast{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.mana-cast label{display:grid;gap:4px;color:var(--ash);font-size:10.5px;letter-spacing:.14em}
+.mana-cast input{width:70px;text-align:center;font:600 18px var(--serif);color:var(--mana-hi)}
+.mana-cast button{min-height:34px;font-size:12.5px}
+.mana-cast button:first-of-type{border-color:color-mix(in srgb,var(--mana) 60%,var(--line-2))}
+.mana-cast-status{color:var(--washi-2);font-size:12.5px}
+
+/* ---------- Rolagem por expressão ---------- */
+.expr-controls{margin-top:8px}
+.expr-controls input{flex:1;min-width:0}
+.expr-help{display:block;margin-top:6px;color:var(--ash);font-size:11.5px}
+
+/* ---------- Personalização ---------- */
+.customize{display:grid;gap:12px;margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-radius:3px}
+.customize legend{padding:0 6px;color:var(--kin);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.customize-row{display:flex;align-items:center;flex-wrap:wrap;gap:14px}
+.customize-row label{display:flex;align-items:center;gap:8px;font-size:13px}
+.customize .editor-label{display:grid;gap:4px;color:var(--ash);font-size:11px;letter-spacing:.12em}
+.customize .editor-label input,.customize .editor-label select{color:var(--washi);font-size:14px;letter-spacing:0;padding:6px 0}
+.customize .editor-label select{padding:6px 8px;justify-self:start}
+.customize-tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px 12px}
+.customize-tabs .eyebrow{grid-column:1/-1}
+.customize-tabs .preference{font-size:13px}
+
+/* ---------- Responsivo ---------- */
+@media (max-width:760px){
+  .resource-row{grid-template-columns:minmax(0,1fr) 46px minmax(0,auto) 32px;grid-template-areas:"name name count del" "pips max reset reset";gap:6px 8px;padding:8px 0}
+  .resource-row>input:first-child{grid-area:name;font-size:14px}
+  .resource-row>.pips{grid-area:pips;align-self:center}
+  .resource-row>.resource-count{grid-area:count}
+  .resource-row>.resource-max{grid-area:max;width:46px}
+  .resource-row>select{grid-area:reset}
+  .resource-row>.icon-btn{grid-area:del}
+  .cursed-meta,.cursed-texts{grid-template-columns:1fr}
+  .cursed-meters{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .top-grid>.health,.top-grid>.mana-card{grid-column:1/-1}
+  .top-grid>.stat{grid-column:span 2}
+  .cursed-head{grid-template-columns:auto minmax(0,1fr)}
+  .attune{grid-column:1/-1;justify-self:start}
+  .roll-field{flex-wrap:wrap}
+  .roll-field>label{flex-basis:100%}
+  .awaken{margin-left:0;width:100%}
+  .cursed::after{font-size:140px}
+}
+@media print{
+  .table-tools,.mana-form,.resource-add,.mana-cast button,.cursed-activate,.cursed-more{display:none!important}
+  .mana-card,.cursed{background:#fff!important}
+}
