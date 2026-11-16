@@ -1,0 +1,46 @@
+/* Easter eggs */
+.egg-toast{position:fixed;left:50%;bottom:104px;z-index:9999;width:min(420px,calc(100vw - 32px));transform:translateX(-50%);display:grid;gap:6px;
+  padding:16px 18px 12px;border:1px solid var(--kin-dim);border-left:3px solid var(--shu);border-radius:3px;
+  background:linear-gradient(160deg,#1b1615f7,#0a0909f7);box-shadow:0 18px 50px #000b;color:var(--washi);cursor:pointer;
+  animation:egg-in .45s var(--ease) both}
+.egg-toast p{margin:0}
+.egg-toast-head{color:var(--kin);font:600 11px var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.egg-line{font:500 18px/1.4 var(--serif);animation:egg-line .7s var(--ease) both}
+.egg-count{margin-top:4px!important;color:var(--ash);font-size:11px;letter-spacing:.08em}
+.egg-toast.egg-out{animation:egg-out .5s ease both}
+@keyframes egg-in{from{opacity:0;transform:translate(-50%,18px)}}
+@keyframes egg-out{to{opacity:0;transform:translate(-50%,12px)}}
+@keyframes egg-line{from{opacity:0;transform:translateY(6px);filter:blur(3px)}}
+
+/* nota no diálogo de rolagem */
+.egg-roll-note{min-height:0;margin:0 0 10px;font:italic 500 17px var(--serif);text-align:center}
+.egg-roll-note:empty{display:none}
+.egg-roll-note.crit{color:var(--kin)}
+.egg-roll-note.fumble{color:var(--ash)}
+#roll-dialog.egg-crit{box-shadow:0 0 0 1px var(--kin),0 0 60px color-mix(in srgb,var(--kin) 35%,transparent)}
+#roll-dialog.egg-crit #roll-total{color:var(--kin);text-shadow:0 0 24px color-mix(in srgb,var(--kin) 60%,transparent)}
+#roll-dialog.egg-fumble #roll-total{color:var(--ash);opacity:.8}
+
+/* corte */
+.egg-slash{position:fixed;left:-10vw;top:50%;z-index:9998;width:120vw;height:3px;pointer-events:none;transform:rotate(var(--angle));
+  background:linear-gradient(90deg,transparent,var(--shu) 20%,#fff 50%,var(--shu) 80%,transparent);box-shadow:0 0 18px var(--shu);
+  transform-origin:center;animation:egg-slash .55s cubic-bezier(.7,0,.2,1) both}
+@keyframes egg-slash{0%{clip-path:inset(0 100% 0 0);opacity:1}55%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 0 0 100%);opacity:0}}
+body.egg-shake{animation:egg-shake .5s steps(2) both}
+@keyframes egg-shake{0%,100%{transform:none}20%{transform:translate(-3px,1px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-2px,0)}80%{transform:translate(2px,1px)}}
+
+/* logo */
+.masthead .mark b.egg-wobble{animation:egg-wobble .3s ease}
+.masthead .mark b.egg-crack{animation:egg-crack 2.4s ease both}
+@keyframes egg-wobble{50%{transform:rotate(-8deg) scale(1.06)}}
+@keyframes egg-crack{0%{filter:none}10%{transform:rotate(6deg)}20%{transform:rotate(-6deg)}30%{transform:none;filter:sepia(1) saturate(.6) brightness(.8)}85%{filter:sepia(1) saturate(.6) brightness(.8)}100%{filter:none}}
+
+/* Vorpal */
+.egg-vorpal{position:fixed;left:0;bottom:24px;z-index:9997;pointer-events:none;animation:egg-run 3.2s linear both}
+.egg-hop{animation:egg-hop .4s ease-in-out infinite alternate;filter:drop-shadow(0 6px 6px #0008)}
+@keyframes egg-run{from{transform:translateX(-90px)}to{transform:translateX(calc(100vw + 20px))}}
+@keyframes egg-hop{from{transform:translateY(0) rotate(4deg)}to{transform:translateY(-34px) rotate(-6deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .egg-toast,.egg-line,.egg-toast.egg-out{animation-duration:.01s}
+}
