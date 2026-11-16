@@ -106,7 +106,8 @@
       out.image = validImage(out.image);
       for (const k of ['hp', 'maxhp', 'ac']) out[k] = Math.max(0, num(f[k]));
       out.attrs = Array.isArray(f.attrs) && f.attrs.length === 6 ? f.attrs.map(n => Math.min(30, Math.max(1, num(n, 10)))) : [10, 10, 10, 10, 10, 10];
-      out.summoned = f.summoned === true;
+      out.summoned = f.summoned === true && f.dead !== true;
+      out.dead = f.dead === true;
       out.skills = Array.isArray(f.skills) ? f.skills.filter(s => s && typeof s === 'object').slice(0, 100).map(s => ({
         title: typeof s.title === 'string' ? s.title.slice(0, 200) : '',
         tag: typeof s.tag === 'string' ? s.tag.slice(0, 80) : '',
@@ -146,9 +147,11 @@
     const species = el('input', undefined, 'familiar-species');
     species.value = f.species; species.placeholder = 'Espécie / tipo de criatura'; species.setAttribute('aria-label', 'Espécie');
     species.oninput = () => { f.species = species.value; save(); };
-    const summon = el('button', f.summoned ? '◉ Invocado' : '○ Dispensado', 'summon-toggle');
+    card.classList.toggle('dead', f.dead === true);
+    const summon = el('button', f.dead ? '✝ Vínculo rompido' : f.summoned ? '◉ Invocado · dispensar' : '○ Invocar · 1 ação', 'summon-toggle');
     summon.setAttribute('aria-pressed', String(f.summoned));
-    summon.onclick = () => { f.summoned = !f.summoned; save(); rerender(); };
+    summon.title = f.dead ? 'Morto. Só efeitos de ressurreição restauram o vínculo.' : f.summoned ? 'Dispensar: ação bônus' : 'Invocação de Familiar: 1 ação, a até 9 m';
+    summon.onclick = () => { toggleSummon(i); };
     id.append(name, species, summon);
     head.append(id);
 
@@ -166,8 +169,19 @@
     const amount = el('input');
     amount.type = 'number'; amount.min = 1; amount.value = 1; amount.setAttribute('aria-label', 'Quantidade de dano ou cura do familiar');
     const hurt = el('button', 'Dano'), heal = el('button', 'Cura');
-    hurt.onclick = () => { f.hp = Math.max(0, f.hp - Math.max(0, num(amount.value))); save(); syncInputs(); drawBar(); };
+    hurt.onclick = () => {
+      f.hp = Math.max(0, f.hp - Math.max(0, num(amount.value)));
+      if (f.hp <= 0 && f.maxhp > 0 && !f.dead) {
+        /* Morte Permanente: o vínculo se rompe */
+        f.dead = true; f.summoned = false; save();
+        summonNotice('✝ ' + (f.name || 'O familiar') + ' morreu. O vínculo espiritual foi rompido; só efeitos de ressurreição podem restaurá-lo.');
+        renderFamiliars(); return;
+      }
+      save(); syncInputs(); drawBar();
+    };
     heal.onclick = () => { f.hp = Math.min(f.maxhp, f.hp + Math.max(0, num(amount.value))); save(); syncInputs(); drawBar(); };
+    heal.disabled = f.dead === true;
+    if (f.dead) heal.title = 'Cura não traz de volta um familiar morto. Use Ressuscitar.';
     const stats = el('div', undefined, 'familiar-stats');
     const hpIn = statInput(f, 'hp', 'PV', drawBar), maxIn = statInput(f, 'maxhp', 'PV máx.', drawBar), acIn = statInput(f, 'ac', 'CA');
     const syncInputs = () => { hpIn.querySelector('input').value = f.hp; };
@@ -221,6 +235,17 @@
     const tools = el('div', undefined, 'toolbar');
     const del = el('button', 'Remover familiar');
     del.onclick = () => { if (!confirm('Remover o familiar “' + (f.name || '') + '”?')) return; state.familiars.splice(i, 1); save(); renderFamiliars(); };
+    if (f.dead) {
+      const revive = el('button', '✚ Ressuscitar', 'red');
+      revive.title = 'Somente após um efeito capaz de ressuscitar criaturas';
+      revive.onclick = () => {
+        if (!confirm('Um efeito de ressurreição trouxe ' + (f.name || 'o familiar') + ' de volta?')) return;
+        f.dead = false; f.hp = Math.max(1, f.hp); save();
+        summonNotice('✚ ' + (f.name || 'O familiar') + ' voltou. O vínculo espiritual foi restaurado.');
+        renderFamiliars();
+      };
+      tools.append(revive);
+    }
     tools.append(del);
 
     card.append(head, vit, attrs, combat, skillsSection(f, rerender), texts, tools);
@@ -341,9 +366,109 @@
     root.replaceChildren();
     if (!state.familiars.length) root.append(el('p', 'Nenhum familiar registrado.', 'footnote'));
     state.familiars.forEach((f, i) => root.append(familiarCard(f, i)));
+    decorateSummonTechnique();
   }
+  /* ---------- Invocação de Familiar (técnica espiritual) ---------- */
+  const notice = el('p', '', 'summon-notice');
+  notice.setAttribute('role', 'status');
+  section.querySelector('.toolbar').after(notice);
+  function summonNotice(text) {
+    notice.textContent = text;
+    document.querySelectorAll('.summon-strip-status').forEach(s => { s.textContent = text; });
+  }
+  function toggleSummon(i) {
+    const f = state.familiars[i];
+    if (!f) return;
+    if (f.dead) return summonNotice('✝ ' + (f.name || 'O familiar') + ' está morto. Só efeitos de ressurreição restauram o vínculo.');
+    if (f.summoned) {
+      f.summoned = false;
+      summonNotice((f.name || 'O familiar') + ' foi dispensado e voltou ao plano espiritual (ação bônus).');
+    } else {
+      if (state.hp <= 0) return summonNotice('Você está inconsciente e não pode invocar.');
+      const other = state.familiars.find(x => x !== f && x.summoned);
+      if (other) other.summoned = false;
+      f.summoned = true;
+      summonNotice((f.name || 'O familiar') + ' foi invocado a até 9 m (1 ação). Ele age logo após o seu turno.' + (other ? ' ' + (other.name || 'O outro familiar') + ' foi dispensado: só um por vez.' : ''));
+    }
+    save(); renderFamiliars(); decorateSummonTechnique();
+  }
+
+  /* Persistência: o mestre inconsciente dispensa o familiar */
+  const baseSave = save;
+  save = function (...args) {
+    const result = baseSave(...args);
+    if (state.hp <= 0 && (state.familiars || []).some(f => f.summoned)) {
+      state.familiars.forEach(f => { f.summoned = false; });
+      baseSave();
+      summonNotice('Você ficou inconsciente. O familiar retornou ao plano espiritual.');
+      renderFamiliars(); decorateSummonTechnique();
+    }
+    return result;
+  };
+
+  /* a técnica na aba Técnicas */
+  const SUMMON_RE = /invoca[cç][aã]o de familiar/i;
+  const SUMMON_TECH = {
+    title: 'Invocação de Familiar',
+    category: 'TÉCNICA ESPIRITUAL — INVOCAÇÃO',
+    requirements: 'Possuir um familiar com o qual esteja sintonizado',
+    cost: '1 ação · V, S',
+    range: '9 metros',
+    damage: '',
+    status: 'Até ser dispensado ou derrotado',
+    text: `Você canaliza sua energia espiritual através do vínculo estabelecido com seu familiar, manifestando-o no plano material.
+
+⤷ Invocação Espiritual: Utilizando uma ação, você invoca seu familiar sintonizado em um espaço desocupado que possa ver a até 9 metros de você.
+
+⤷ Vínculo Espiritual: O familiar utiliza sua própria ficha de atributos, pontos de vida, habilidades e características.
+
+⤷ Iniciativa Compartilhada: O familiar age imediatamente após seu turno, possuindo seu próprio movimento, ação, ação bônus e reação. Você pode transmitir comandos mentalmente sem gastar ações.
+
+⤷ Dispensar Familiar: Você pode dispensar voluntariamente seu familiar utilizando uma ação bônus, fazendo-o retornar ao plano espiritual.
+
+⤷ Limitação: Você só pode manter um familiar invocado por vez.
+
+⤷ Morte Permanente: Caso os pontos de vida do familiar sejam reduzidos a 0, ele morre definitivamente. Seu vínculo espiritual é rompido, impossibilitando que seja invocado novamente por meios convencionais. Apenas efeitos capazes de ressuscitar criaturas podem restaurá-lo.
+
+⤷ Persistência: O familiar permanece invocado até ser dispensado, morrer ou até que seu mestre fique inconsciente.`
+  };
+  if (Array.isArray(state.customAbilities) && !state.customAbilities.some(a => SUMMON_RE.test(a.title || ''))) {
+    state.customAbilities.push({ ...SUMMON_TECH });
+    save();
+    editableRecords('#custom-abilities', state.customAbilities);
+  }
+
+  /* atalhos de invocar/dispensar dentro do cartão da técnica */
+  const techRoot = $('#custom-abilities');
+  function decorateSummonTechnique() {
+    const techRoot = $('#custom-abilities');
+    if (!techRoot) return;
+    [...techRoot.children].forEach((card, k) => {
+      const entry = state.customAbilities[k];
+      card.querySelector('.summon-strip')?.remove();
+      if (!entry || !SUMMON_RE.test(entry.title || '')) return;
+      card.classList.add('summon-tech');
+      const strip = el('div', undefined, 'summon-strip');
+      strip.append(el('p', '召 / FAMILIARES', 'eyebrow'));
+      const row = el('div', undefined, 'summon-strip-row');
+      if (!state.familiars.length) row.append(el('span', 'Nenhum familiar registrado em Relações.', 'footnote'));
+      state.familiars.forEach((f, i) => {
+        const b = el('button', (f.dead ? '✝ ' : f.summoned ? '◉ ' : '○ ') + (f.name || 'Familiar') + (f.dead ? ' · morto' : f.summoned ? ' · dispensar' : ' · invocar'));
+        b.type = 'button';
+        b.className = 'summon-chip' + (f.summoned ? ' on' : '') + (f.dead ? ' dead' : '');
+        b.onclick = () => toggleSummon(i);
+        row.append(b);
+      });
+      strip.append(row, el('p', notice.textContent, 'summon-strip-status'));
+      const remove = card.querySelector(':scope > button');
+      remove ? remove.before(strip) : card.append(strip);
+    });
+  }
+  if (techRoot) new MutationObserver(decorateSummonTechnique).observe(techRoot, { childList: true });
+  decorateSummonTechnique();
+
   $('#add-familiar').onclick = () => {
-    state.familiars.push({ name: 'Novo familiar', species: '', bond: '', hp: 0, maxhp: 0, ac: 10, speed: '', senses: '', attrs: [10, 10, 10, 10, 10, 10], attack: '', damage: '', abilities: '', appearance: '', image: '', notes: '', summoned: false, skills: [] });
+    state.familiars.push({ name: 'Novo familiar', species: '', bond: '', hp: 0, maxhp: 0, ac: 10, speed: '', senses: '', attrs: [10, 10, 10, 10, 10, 10], attack: '', damage: '', abilities: '', appearance: '', image: '', notes: '', summoned: false, dead: false, skills: [] });
     save(); renderFamiliars();
     $('#familiars .familiar-card:last-child .familiar-name')?.select();
   };

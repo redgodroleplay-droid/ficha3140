@@ -38,6 +38,26 @@
 .summon-toggle{justify-self:start;margin-top:6px;font-size:12px;border-radius:20px}
 .summon-toggle[aria-pressed=true]{border-color:var(--familiar);background:color-mix(in srgb,var(--familiar) 22%,#101413);color:#fff}
 
+/* Invocação de Familiar */
+.summon-notice{margin:-4px 0 12px;color:var(--familiar);font:italic 500 16px var(--serif)}
+.summon-notice:empty{display:none}
+.familiar-card.dead{filter:grayscale(.85);border-color:var(--line)}
+.familiar-card.dead .portrait-frame{opacity:.6}
+.familiar-card.dead .summon-toggle{border-color:#6a5a55;color:var(--ash);text-decoration:line-through;text-decoration-color:#e8432c}
+.familiar-card.dead .familiar-bar i{background:#333;box-shadow:none}
+.familiar-card.dead .toolbar .red{filter:none}
+.summon-tech{border-color:color-mix(in srgb,var(--familiar) 32%,var(--line))}
+.summon-tech>input:first-child{color:var(--familiar)!important}
+.summon-strip{display:grid;gap:8px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--familiar) 30%,var(--line));border-radius:3px;
+  background:radial-gradient(ellipse 80% 80% at 0% 0%,color-mix(in srgb,var(--familiar) 12%,transparent),transparent 70%),#0b0d0d}
+.summon-strip .eyebrow{margin:0;color:var(--familiar)}
+.summon-strip-row{display:flex;flex-wrap:wrap;gap:6px}
+.summon-chip{min-height:34px;padding:5px 14px;border-radius:20px;font-size:13px}
+.summon-chip.on{border-color:var(--familiar);background:color-mix(in srgb,var(--familiar) 22%,#101413);color:#fff;box-shadow:0 0 12px color-mix(in srgb,var(--familiar) 40%,transparent)}
+.summon-chip.dead{color:var(--ash);text-decoration:line-through;text-decoration-color:#e8432c}
+.summon-strip-status{margin:0;color:var(--washi-2);font:italic 500 15px var(--serif)}
+.summon-strip-status:empty{display:none}
+
 .familiar-vitals{display:grid;gap:10px}
 .familiar-bar{background:#14302c}
 .familiar-bar i{background:linear-gradient(90deg,color-mix(in srgb,var(--familiar) 45%,#000),var(--familiar) 60%,color-mix(in srgb,var(--familiar) 60%,#fff));box-shadow:0 0 12px color-mix(in srgb,var(--familiar) 55%,transparent)}
