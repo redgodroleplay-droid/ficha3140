@@ -245,11 +245,18 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
       const enemy = el('input'); enemy.type = 'checkbox'; enemy.checked = h.enemyHalf;
       enemy.onchange = () => { h.enemyHalf = enemy.checked; save(); enhance(); };
       cond2.append(enemy, el('span', 'Sangue do adversário · hostil visível a até 9 m com ≤ metade dos PV'));
-      const draw = el('button', '血 Desembainhar · ação bônus', 'red hk-draw');
-      draw.disabled = !(ownBlood && h.enemyHalf);
-      draw.title = draw.disabled ? 'As duas condições precisam ser verdadeiras ao mesmo tempo.' : 'Não há volta até ficar inconsciente.';
+      const ready = ownBlood && h.enemyHalf;
+      const draw = el('button', '血 Desembainhar · ação bônus', 'red hk-draw' + (ready ? '' : ' locked'));
+      draw.title = ready ? 'Não há volta até ficar inconsciente.' : 'O selo ainda segura a lâmina.';
       draw.onclick = () => {
-        if (!confirm('Desembainhar a Ame no Habakiri?\nVocê entra em Frenesi Carmesim e não pode guardá-la até ficar inconsciente.')) return;
+        if (!ready) {
+          const missing = [];
+          if (!ownBlood) missing.push('seus PV precisam estar em ' + half + ' ou menos (agora: ' + state.hp + ')');
+          if (!h.enemyHalf) missing.push('marque um inimigo a até 9 m com metade dos PV ou menos');
+          lastMessage = 'O selo ainda segura a lâmina: ' + missing.join('; ') + '.';
+          status.textContent = lastMessage;
+          if (!confirm('As condições de despertar não foram cumpridas:\n• ' + missing.join('\n• ') + '\n\nDesembainhar mesmo assim (o mestre permitiu)?')) return;
+        } else if (!confirm('Desembainhar a Ame no Habakiri?\nVocê entra em Frenesi Carmesim e não pode guardá-la até ficar inconsciente.')) return;
         h.drawn = true; h.turn = 0; h.enemyHalf = false; h.alone = false; lastMessage = '';
         refresh();
         document.body.classList.add('hk-unsheathe');

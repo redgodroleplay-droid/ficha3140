@@ -46,7 +46,8 @@
 .hk-cond.ok{color:var(--washi)}
 .hk-cond.ok i{color:var(--blood-hi)}
 .hk-draw{justify-self:start;margin-top:4px}
-.hk-draw:disabled{filter:grayscale(.7);opacity:.5}
+.hk-draw.locked{filter:grayscale(.55);opacity:.7}
+.hk-draw.locked:hover{filter:none;opacity:1}
 
 /* preço */
 .is-drawn .hk-price{border-style:solid;border-color:#5a1420}
