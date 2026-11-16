@@ -57,14 +57,38 @@
 .fam-attr button{min-height:26px;padding:2px 8px;font-size:11.5px;border-radius:20px}
 .familiar-combat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .familiar-texts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.familiar-texts>.editor-label:first-child{grid-column:1/-1}
+.familiar-texts>.editor-label:first-child,.familiar-texts>.fam-wide{grid-column:1/-1}
+.familiar-card .familiar-texts textarea{min-height:110px;max-height:70vh;resize:vertical;overflow-y:auto;line-height:1.55}
 .familiar-card .toolbar{margin:0}
+
+/* subseção de habilidades do familiar */
+.fam-skills{display:grid;gap:10px;padding:14px;border:1px solid color-mix(in srgb,var(--familiar) 28%,var(--line));border-radius:3px;background:#0a0c0c99}
+.fam-skills-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px}
+.fam-skills-head .eyebrow{margin:0}
+.fam-skills-head h4{margin:2px 0 0;font:600 20px var(--serif);color:var(--washi)}
+.fam-skills-actions{display:flex;flex-wrap:wrap;gap:6px}
+.fam-skills-actions button{min-height:32px;padding:5px 12px;font-size:12.5px}
+.fam-skill-list{display:grid;gap:6px}
+.fam-skill{border:1px solid var(--line);border-left:3px solid var(--familiar);border-radius:2px;background:#0d0f0fcc}
+.fam-skill[open]{border-color:color-mix(in srgb,var(--familiar) 40%,var(--line));border-left-color:var(--familiar)}
+.fam-skill summary{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;list-style:none}
+.fam-skill summary::-webkit-details-marker{display:none}
+.fam-skill summary::before{content:'▸';color:var(--familiar);transition:transform .15s}
+.fam-skill[open] summary::before{transform:rotate(90deg)}
+.fam-skill summary b{font:600 16px var(--serif);color:var(--washi)}
+.fam-skill-tag{margin-left:auto;padding:2px 8px;border:1px solid color-mix(in srgb,var(--familiar) 45%,transparent);border-radius:20px;color:var(--familiar);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+.fam-skill-body{display:grid;gap:12px;padding:4px 12px 12px}
+.fam-skill-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
+.familiar-card .fam-skill-body textarea{min-height:90px;max-height:70vh;resize:vertical;overflow-y:auto;line-height:1.55}
+.fam-skill-tools{display:flex;gap:6px;justify-content:flex-end}
+.fam-skill-tools button{min-height:30px;padding:4px 10px;font-size:12px}
 
 @media (max-width:620px){
   .familiar-attrs{grid-template-columns:repeat(3,minmax(0,1fr))}
   .familiar-combat,.familiar-texts{grid-template-columns:1fr}
   .familiar-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
   .familiar-stats .editor-label{grid-column:1/-1}
+  .fam-skill-row{grid-template-columns:1fr}
 }
 @media (max-width:420px){
   .relation-top,.familiar-head{grid-template-columns:1fr;justify-items:start}
