@@ -79,6 +79,7 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
     h.twoHands = h.twoHands === true;
     h.enemyHalf = h.enemyHalf === true;
     h.alone = h.alone === true;
+    h.humanTarget = h.humanTarget === true;
     h.turn = Math.max(0, Math.min(99, Number(h.turn) || 0));
     return h;
   }
@@ -121,7 +122,7 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
       if (s.codex === CODEX) w.codex = CODEX;
       if (s.habakiri && typeof s.habakiri === 'object') w.habakiri = {
         drawn: s.habakiri.drawn === true, twoHands: s.habakiri.twoHands === true,
-        enemyHalf: s.habakiri.enemyHalf === true, alone: s.habakiri.alone === true,
+        enemyHalf: s.habakiri.enemyHalf === true, alone: s.habakiri.alone === true, humanTarget: s.habakiri.humanTarget === true,
         turn: Math.max(0, Math.min(99, Number(s.habakiri.turn) || 0))
       };
     });
@@ -168,6 +169,21 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
 
   /* ---------- painel ---------- */
   const signedNum = n => (n >= 0 ? '+' : '') + n;
+  const isHuman = () => /human/i.test(state.race || '');
+
+  /* rolagem de dano separando físico e necrótico (o necrótico dobra em alvo humano) */
+  function rollSplit(title, physical, necro, flat, doubleNecro) {
+    const roll = (n, s) => Array.from({ length: n }, () => die(s));
+    const p = physical ? roll(physical[0], physical[1]) : [];
+    const nd = necro[0] ? roll(necro[0], necro[1]) : [];
+    const pSum = p.reduce((a, b) => a + b, 0) + flat;
+    const nRaw = nd.reduce((a, b) => a + b, 0);
+    const nSum = doubleNecro ? nRaw * 2 : nRaw;
+    const parts = [];
+    if (physical) parts.push(physical[0] + 'd' + physical[1] + ' [' + p.join(', ') + '] ' + signedNum(flat) + ' = ' + pSum + ' ' + physical[2]);
+    if (nd.length) parts.push(necro[0] + 'd' + necro[1] + ' [' + nd.join(', ') + ']' + (doubleNecro ? ' ×2 (humano)' : '') + ' = ' + nSum + ' necrótico');
+    rollResult(title, pSum * (physical ? 1 : 0) + nSum, parts.join(' · '));
+  }
   let lastMessage = '';
   function panel(w, card) {
     const h = hk(w);
@@ -210,14 +226,19 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
     const name = w.name || 'Ame no Habakiri';
     const atk = el('button', '⚔ Ataque ' + signedNum((h.drawn ? 2 : 1)));
     atk.onclick = () => window.rollExpr('Ataque · ' + name, '1d20+' + w.attack);
+    const f = h.drawn ? FORMS.drawn : FORMS.sheathed;
+    const dieSize = h.twoHands ? f.die2 : f.die;
+    const flat = mod(state.attrs[0]) + f.bonus;
+    const humanTarget = h.drawn && h.humanTarget;
     const dmg = el('button', '✶ Dano');
-    dmg.onclick = () => window.rollExpr('Dano · ' + name, damageExpr(w));
+    dmg.onclick = () => h.drawn
+      ? rollSplit('Dano · ' + name + (humanTarget ? ' · alvo humano' : ''), [1, dieSize, f.type], [2, 8], flat, humanTarget)
+      : window.rollExpr('Dano · ' + name, damageExpr(w));
     const crit = el('button', '☠ Crítico');
     crit.title = h.drawn ? 'Dados dobrados + 2d8 necrótico do Fio Carmesim' : 'Dados dobrados';
-    crit.onclick = () => {
-      const doubled = damageExpr(w).replace(/(\d*)d(\d+)/gi, (_, n, s) => (Number(n || 1) * 2) + 'd' + s);
-      window.rollExpr('Crítico · ' + name, doubled + (h.drawn ? '+2d8' : ''));
-    };
+    crit.onclick = () => h.drawn
+      ? rollSplit('Crítico · ' + name + (humanTarget ? ' · alvo humano' : ''), [2, dieSize, f.type], [6, 8], flat, humanTarget)
+      : window.rollExpr('Crítico · ' + name, '2d' + dieSize + '+FOR+' + f.bonus);
     const hands = el('label', undefined, 'preference hk-hands');
     const handsBox = el('input'); handsBox.type = 'checkbox'; handsBox.checked = h.twoHands;
     handsBox.onchange = () => { h.twoHands = handsBox.checked; refresh(); };
@@ -226,10 +247,17 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
     if (h.drawn) {
       const bleed = el('button', '滴 Sangramento 1d8');
       bleed.title = 'Sede de Sangue: no início do turno da criatura atingida';
-      bleed.onclick = () => window.rollExpr('Sede de Sangue · sangramento', '1d8');
+      bleed.onclick = () => rollSplit('Sede de Sangue · sangramento' + (humanTarget ? ' · alvo humano' : ''), null, [1, 8], 0, humanTarget);
       combat.append(bleed);
     }
     combat.append(hands);
+    if (h.drawn) {
+      const human = el('label', undefined, 'preference hk-human');
+      const humanBox = el('input'); humanBox.type = 'checkbox'; humanBox.checked = h.humanTarget === true;
+      humanBox.onchange = () => { h.humanTarget = humanBox.checked; save(); enhance(); };
+      human.append(humanBox, document.createTextNode('Alvo humano (necrótico ×2)'));
+      combat.append(human);
+    }
     box.append(combat);
 
     const status = el('p', '', 'hk-status');
@@ -276,8 +304,15 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
       }
       price.append(track);
       const apply = (title, expr) => {
-        const total = window.rollExpr(title, expr);
+        let total = window.rollExpr(title, expr);
         if (total === null || total === undefined) return null;
+        if (isHuman()) {
+          /* dano necrótico dobra em humanos */
+          const rolled = total;
+          total *= 2;
+          document.getElementById('roll-total').textContent = total;
+          document.getElementById('roll-detail').textContent += ' · ×2 necrótico (humano): ' + rolled + ' → ' + total;
+        }
         state.hp = Math.max(0, Number(state.hp) - total);
         if (typeof summary === 'function') summary();
         if (state.hp <= 0) silence('Reduzido a 0 PV. A espada silencia. Faça salvaguardas contra a morte.');
@@ -302,7 +337,7 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
         row.append(last);
       }
       row.append(alone);
-      price.append(row, el('p', 'Ignora resistências, imunidades e PV temporários. Desconta direto dos PV.', 'hk-note'));
+      price.append(row, el('p', 'Ignora resistências, imunidades e PV temporários. Desconta direto dos PV.' + (isHuman() ? ' Você é humano: o necrótico chega dobrado.' : ''), 'hk-note'));
       const out = el('button', '鞘 Portador inconsciente · a espada silencia');
       out.className = 'hk-silence';
       out.onclick = () => { if (confirm('O portador ficou inconsciente? A lâmina volta à bainha.')) silence('A lâmina retornou à bainha. O frenesi terminou.'); };

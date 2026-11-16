@@ -200,7 +200,9 @@
   const healthStatus = healthForm.nextElementSibling;
   healthForm.onsubmit = e => {
     e.preventDefault();
-    const amount = Math.max(0, num(healthForm.querySelector('input').value));
+    /* dano necrótico dobra em humanos (antes dos PV temporários) */
+    const necro = e.submitter?.value === 'necro' && /human/i.test(state.race || '');
+    const amount = Math.max(0, num(healthForm.querySelector('input').value)) * (necro ? 2 : 1);
     const before = state.hp;
     let absorbed = 0;
     if (Number(e.submitter?.value) > 0) state.hp += amount;
@@ -211,7 +213,7 @@
     }
     summary(); save();
     const change = state.hp - before;
-    healthStatus.textContent = (absorbed ? absorbed + ' absorvido pelos PV temporários · ' : '') + (change ? signed(change) + ' PV' : absorbed ? '' : 'PV já no limite.');
+    healthStatus.textContent = (necro ? 'Necrótico ×2 (humano): ' + amount + ' · ' : '') + (absorbed ? absorbed + ' absorvido pelos PV temporários · ' : '') + (change ? signed(change) + ' PV' : absorbed ? '' : 'PV já no limite.');
   };
   tempInput.oninput = () => { state.tempHp = Math.max(0, num(tempInput.value)); summary(); save(); };
 

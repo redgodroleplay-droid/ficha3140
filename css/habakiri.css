@@ -1,3 +1,7 @@
+/* dano necrótico na vida (dobra em humanos) */
+.session-health .necro-damage{border-color:#5b2a6e;color:#d9a6ff}
+.session-health .necro-damage:hover{background:#24122c}
+
 /* Ame no Habakiri */
 .hk-card{--blood:#c3122f;--blood-hi:#ff4a63}
 .hk-card .cursed-combat,.hk-card .cursed-meters,.hk-card .cursed-activate,.hk-card .cursed-status{display:none}
