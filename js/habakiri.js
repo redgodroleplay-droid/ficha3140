@@ -66,6 +66,23 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
 
 “A primeira gota de sangue abre o caminho. A última pertence àquele que ousou empunhá-la.”`;
 
+  const IMAGE = 'assets/images/ame-no-habakiri.webp';
+  const APPEARANCE = `“天の羽々斬り — a lâmina que corta até o céu.”
+
+A Lâmina. Fio carmesim, herança de gerações. Veios vermelhos correm pelo aço negro como sangue vivo: uma lâmina que corta além do físico, atravessando o próprio destino.
+A Bainha. Mais que proteção, um registro. Laca negra trabalhada em prata, com o nome ADRITCH gravado entre luas, nuvens e flores. Cada marca, uma geração. Cada gravura, uma história.
+A Empunhadura. Tsuka trançada em preto e vermelho, tsuba de prata lavrada e uma longa borla carmesim pendendo do cabo.
+O Símbolo da Linhagem. A lua crescente, símbolo dos Adritch. Um farol na escuridão, um corte na história.
+A Marca da Maldição. A flor que sangra, lembrando que a Ame no Habakiri jamais saciará sua fome.
+
+As gravuras da bainha:
+• I — A Origem: O primeiro Adritch. O início de uma linhagem.
+• II — O Confronto: A família que enfrentou o impossível.
+• III — A Traição: O nome que foi apagado.
+• IV — O Sacrifício: O sangue que selou o legado.
+• V — O Último Portador: A promessa que não se cumpriu.
+• VI — O Legado: E agora... a história continua.`;
+
   const FORMS = {
     sheathed: { atk: 'FOR+PB+1', die: 6, die2: 8, bonus: 1, type: 'concussão', extra: '' },
     drawn: { atk: 'FOR+PB+2', die: 10, die2: 12, bonus: 2, type: 'cortante', extra: '2d8' }
@@ -98,6 +115,7 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
     if (!Array.isArray(state.cursedWeapons)) return;
     let w = state.cursedWeapons.find(x => MATCH.test(x.name || ''));
     if (!w) { w = { corruption: 0, corruptionMax: 0, charges: 0, chargesMax: 0, reset: 'long', manaCost: '', activationCorrupts: false, attuned: true, notes: '' }; state.cursedWeapons.unshift(w); }
+    if (typeof w.appearance !== 'string' || !w.appearance.trim()) { w.appearance = APPEARANCE; if (w.codex === CODEX) save(); }
     if (w.codex === CODEX) { hk(w); return; }
     Object.assign(w, {
       name: 'Ame no Habakiri', spirit: 'A Espada Sedenta de Sangue', type: 'Katana', rarity: 'Muito rara · requer sintonização',
@@ -120,6 +138,7 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
       const s = src[i];
       if (!s || !MATCH.test(w.name || '')) return;
       if (s.codex === CODEX) w.codex = CODEX;
+      if (typeof s.appearance === 'string') w.appearance = s.appearance.slice(0, 20000);
       if (s.habakiri && typeof s.habakiri === 'object') w.habakiri = {
         drawn: s.habakiri.drawn === true, twoHands: s.habakiri.twoHands === true,
         enemyHalf: s.habakiri.enemyHalf === true, alone: s.habakiri.alone === true, humanTarget: s.habakiri.humanTarget === true,
@@ -355,6 +374,40 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
     return box;
   }
 
+  /* ---------- imagem da espada ---------- */
+  let lightbox;
+  function hero(w) {
+    const fig = el('figure', undefined, 'hk-hero');
+    const img = el('img');
+    img.src = IMAGE;
+    img.alt = 'Ame no Habakiri: katana de lâmina negra com veios carmesins e bainha de laca gravada com o nome Adritch, luas crescentes e flores vermelhas.';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    const cap = el('figcaption');
+    cap.append(el('span', '天の羽々斬り', 'hk-hero-jp'), el('span', 'Toque para ampliar'));
+    const open = el('button', undefined, 'hk-hero-open');
+    open.type = 'button';
+    open.setAttribute('aria-label', 'Ampliar a imagem da ' + (w.name || 'espada'));
+    open.append(img, cap);
+    open.onclick = () => {
+      if (!lightbox) {
+        lightbox = el('dialog', undefined, 'hk-lightbox');
+        const big = el('img');
+        big.alt = img.alt;
+        const close = el('button', '×', 'hk-lightbox-close');
+        close.type = 'button'; close.setAttribute('aria-label', 'Fechar');
+        close.onclick = () => lightbox.close();
+        lightbox.append(close, big);
+        lightbox.onclick = e => { if (e.target === lightbox || e.target === big) lightbox.close(); };
+        document.body.append(lightbox);
+      }
+      lightbox.querySelector('img').src = IMAGE;
+      lightbox.showModal();
+    };
+    fig.append(open);
+    return fig;
+  }
+
   /* ---------- montar no cartão ---------- */
   let busy = false;
   function enhance() {
@@ -390,7 +443,8 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
         const stageSel = card.querySelector('.cursed-meta select');
         if (stageSel) { stageSel.value = w.stage; stageSel.disabled = true; stageSel.title = 'Controlado pelo painel da espada'; }
         card.querySelector(':scope > .hk')?.remove();
-        card.querySelector('.cursed-head').after(panel(w, card));
+        if (!card.querySelector(':scope > .hk-hero')) card.querySelector('.cursed-head').after(hero(w));
+        card.querySelector(':scope > .hk-hero').after(panel(w, card));
 
         const texts = card.querySelector('.cursed-texts');
         if (texts && !card.querySelector('.hk-lore')) {
@@ -400,7 +454,18 @@ Sua sintonização não pode ser encerrada voluntariamente enquanto estiver amal
           const edit = el('button', 'Editar texto');
           edit.type = 'button';
           const view = el('div', undefined, 'hk-lore-view');
-          const draw = () => view.replaceChildren(codex(w.powers), codex(w.curse));
+          const draw = () => {
+            const look = el('section', undefined, 'hk-sec hk-look');
+            const h = el('h4');
+            h.append(el('span', '外見', 'hk-num hk-jp'), document.createTextNode('APARÊNCIA'));
+            look.append(h, codex(w.appearance));
+            view.replaceChildren(look, codex(w.powers), codex(w.curse));
+          };
+          if (!texts.querySelector('.hk-appearance-field')) {
+            const field = labeledField('Aparência', w.appearance, v => { w.appearance = v; save(); }, true);
+            field.classList.add('hk-appearance-field');
+            texts.prepend(field);
+          }
           edit.onclick = () => {
             const editing = texts.classList.toggle('hk-editing');
             edit.textContent = editing ? 'Ver códex' : 'Editar texto';
