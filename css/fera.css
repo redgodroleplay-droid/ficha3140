@@ -1,0 +1,82 @@
+/* Modo Fera: carmesim de sangue, garras e pulso que acelera com o número de gatilhos */
+body{--fera-level:0}
+body.mood-fera{--shu:#ff1f3d;--shu-hi:#ff6b7d;--shu-deep:#7a0618;--kin:#ff5a66;--kin-dim:#8a2a33;--line:#4a1820;--line-2:#6e2430}
+
+.fera-layer{position:fixed;inset:0;z-index:39;pointer-events:none;opacity:0;transition:opacity .8s ease;
+  background:radial-gradient(ellipse 90% 55% at 50% 115%,#a0001a33,transparent 60%),radial-gradient(ellipse 70% 50% at 100% 0%,#5a000f40,transparent 65%);
+  box-shadow:inset 0 0 calc(60px + var(--fera-level) * 30px) calc(4px + var(--fera-level) * 8px) #2a0008b0}
+.mood-fera .fera-layer{opacity:1}
+
+/* garras */
+.fera-claw{position:absolute;width:min(240px,46vw);height:min(300px,58vw);opacity:calc(.12 + var(--fera-level) * .05);
+  background:linear-gradient(90deg,transparent 0 16%,#ff1f3d 16% 19%,transparent 19% 42%,#ff1f3d 42% 45.5%,transparent 45.5% 68%,#ff1f3d 68% 71%,transparent 71%);
+  -webkit-mask-image:linear-gradient(transparent,#000 22%,#000 68%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 68%,transparent);
+  filter:drop-shadow(0 0 8px #ff1f3d)}
+.fera-claw.a{top:90px;right:2vw;transform:rotate(28deg)}
+.fera-claw.b{bottom:-40px;left:4vw;transform:rotate(-152deg)}
+
+/* olhos, só a partir de 2 gatilhos */
+.fera-eyes{position:absolute;top:14vh;left:50%;display:flex;gap:min(120px,22vw);transform:translateX(-50%);opacity:0}
+.fera-eyes b{width:46px;height:7px;border-radius:50%;background:#ff2a40;box-shadow:0 0 14px 4px #ff1f3d,0 0 40px 10px #ff1f3d66}
+.fera-eyes b:first-child{transform:rotate(12deg)}
+.fera-eyes b:last-child{transform:rotate(-12deg)}
+.mood-fera[style*="--fera-level: 2"] .fera-eyes{opacity:.22}
+.mood-fera[style*="--fera-level: 3"] .fera-eyes{opacity:.38}
+.mood-fera[style*="--fera-level: 4"] .fera-eyes{opacity:.55}
+
+/* a página reage */
+.mood-fera .card,.mood-fera .beast-panel{border-color:color-mix(in srgb,var(--shu) 34%,var(--line))}
+.mood-fera h1,.mood-fera h2{text-shadow:0 0 22px #ff1f3d55}
+.mood-fera .bar i{box-shadow:0 0 14px #ff1f3d}
+
+/* botão rápido */
+.fera-fab{position:fixed;z-index:25;right:max(22px,env(safe-area-inset-right));bottom:calc(max(22px,env(safe-area-inset-bottom)) + 70px);
+  display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 14px 4px 5px;border:1px solid var(--line-2);border-radius:24px;
+  background:#120d0de6;backdrop-filter:blur(6px);color:var(--washi-2);font-size:12.5px;font-weight:600;letter-spacing:.06em;box-shadow:0 8px 22px #0009}
+.fera-fab b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#2a1414;font:700 16px var(--jp);color:#ff8a95}
+.fera-fab:hover{border-color:#ff1f3d;color:#fff}
+.fera-fab.on{border-color:#ff1f3d;color:#fff;background:#2a070de6}
+.fera-fab.on b{background:#ff1f3d;color:#fff;box-shadow:0 0 16px #ff1f3d}
+
+/* painel */
+.fera-dialog{width:min(480px,calc(100vw - 32px))}
+.fera-dialog .dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fera-dialog .dialog-heading h2{margin:0}
+.fera-intro{color:var(--ash);font-size:13px;line-height:1.5}
+.fera-list{display:grid;gap:8px;margin:12px 0}
+.fera-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:#0d0a0acc;cursor:pointer}
+.fera-row.on{border-color:#ff1f3d;background:linear-gradient(90deg,#3a0610cc,#0d0a0acc)}
+.fera-glyph{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--line-2);border-radius:50%;font:700 18px var(--jp);font-style:normal;color:#ff8a95}
+.fera-row.on .fera-glyph{border-color:#ff1f3d;background:#ff1f3d;color:#fff;box-shadow:0 0 14px #ff1f3d}
+.fera-row-text{display:grid;gap:2px;text-align:left}
+.fera-intro,.fera-list{text-align:left}
+.fera-row-text b{font:600 16px var(--serif);color:var(--washi)}
+.fera-row-text small{color:var(--ash);font-size:12px;line-height:1.4}
+.fera-row input{width:20px;height:20px;accent-color:#ff1f3d}
+.fera-off{width:100%}
+.fera-open{margin-top:8px}
+
+/* despertar */
+.fera-flash{position:fixed;inset:0;z-index:9990;display:grid;place-content:center;justify-items:center;gap:8px;pointer-events:none;opacity:0}
+.fera-flash b{font:800 min(42vw,320px)/1 var(--jp);color:#ff1f3d;text-shadow:0 0 40px #ff1f3d,0 0 120px #a0001a}
+.fera-flash span{color:#fff;font:600 13px var(--sans);letter-spacing:.22em;text-transform:uppercase;text-align:center;padding:0 16px}
+.fera-flash.go{animation:fera-flash 1.7s ease both}
+@keyframes fera-flash{0%{opacity:0;transform:scale(1.5);background:#ff1f3d00}12%{opacity:1;transform:scale(1);background:#2a000aaa}55%{opacity:1;background:#14000566}100%{opacity:0;transform:scale(.96);background:transparent}}
+body.fera-roar main{animation:fera-roar .55s steps(2) both}
+@keyframes fera-roar{0%,100%{transform:none}25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,1px)}}
+
+@media (prefers-reduced-motion:no-preference){
+  .mood-fera .fera-layer{animation:fera-pulse calc(2.2s - var(--fera-level) * .35s) ease-in-out infinite}
+  .mood-fera .fera-eyes{animation:fera-blink 6s ease-in-out infinite}
+  .mood-fera .fera-claw{animation:fera-claw .6s cubic-bezier(.7,0,.2,1) both}
+}
+@keyframes fera-pulse{50%{box-shadow:inset 0 0 calc(80px + var(--fera-level) * 40px) calc(10px + var(--fera-level) * 12px) #5a000ed0}}
+@keyframes fera-blink{0%,92%,100%{transform:translateX(-50%) scaleY(1)}95%{transform:translateX(-50%) scaleY(.1)}}
+@keyframes fera-claw{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){.fera-flash.go{animation-duration:.9s}}
+
+@media (max-width:620px){
+  .fera-fab{bottom:calc(max(22px,env(safe-area-inset-bottom)) + 70px);padding:5px}
+  .fera-fab span{display:none}
+}
+@media print{.fera-layer,.fera-flash,.fera-fab{display:none!important}}
