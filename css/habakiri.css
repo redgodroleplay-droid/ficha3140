@@ -1,0 +1,97 @@
+/* Ame no Habakiri */
+.hk-card{--blood:#c3122f;--blood-hi:#ff4a63}
+.hk-card .cursed-combat,.hk-card .cursed-meters,.hk-card .cursed-activate,.hk-card .cursed-status{display:none}
+.hk-card .cursed-texts:not(.hk-editing){display:none}
+.hk-card .cursed-meta select:disabled{opacity:.75;cursor:not-allowed}
+
+.hk{display:grid;gap:14px}
+.hk-label{margin:0;color:var(--ash);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+.hk-note{margin:0;color:var(--ash);font-size:12px}
+.hk-status{margin:0;min-height:0;color:var(--blood-hi);font:italic 500 16px var(--serif)}
+.hk-status:empty{display:none}
+
+/* faixa */
+.hk-ribbon{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line-2);border-radius:3px;
+  background:linear-gradient(100deg,#151010,#0b0909)}
+.hk-ribbon-glyph{display:grid;place-items:center;flex:none;width:44px;height:44px;border:1px solid var(--line-2);border-radius:50%;font:800 22px var(--jp);color:var(--washi-2)}
+.hk-ribbon strong{display:block;font:600 21px/1.15 var(--serif);color:var(--washi)}
+.hk-ribbon span{color:var(--ash);font-size:12.5px}
+.is-drawn .hk-ribbon{border-color:var(--blood);background:linear-gradient(100deg,#3a0610,#120708 70%)}
+.is-drawn .hk-ribbon-glyph{border-color:var(--blood);background:var(--blood);color:#fff;box-shadow:0 0 22px var(--blood)}
+.is-drawn .hk-ribbon span{color:var(--blood-hi);letter-spacing:.04em}
+
+/* formas */
+.hk-forms{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hk-form{display:grid;gap:6px;align-content:start;padding:12px;border:1px solid var(--line);border-radius:3px;background:#0b0909aa;opacity:.55;transition:opacity .3s,border-color .3s}
+.hk-form.active{opacity:1;border-color:var(--line-2);background:#151010}
+.is-drawn .hk-form.active{border-color:var(--blood);box-shadow:inset 0 0 30px #c3122f22}
+.hk-form-head{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.hk-form-head i{font:700 17px var(--jp);font-style:normal;color:var(--kin)}
+.is-drawn .hk-form.active .hk-form-head i{color:var(--blood-hi)}
+.hk-form-head b{font:600 17px var(--serif);color:var(--washi)}
+.hk-row{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px;font-size:12.5px;line-height:1.4}
+.hk-row span:first-child{color:var(--ash);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding-top:2px}
+.hk-row span:last-child{color:var(--washi-2)}
+
+/* ações */
+.hk-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.hk-actions button{min-height:36px;padding:6px 13px;font-size:13px}
+.hk-hands{margin-left:auto}
+
+/* despertar */
+.hk-wake,.hk-price{display:grid;gap:8px;padding:14px;border:1px dashed var(--line-2);border-radius:3px;background:#0a0808aa}
+.hk-cond{display:flex;align-items:center;gap:10px;color:var(--ash);font-size:13px;line-height:1.4}
+.hk-cond i{font-style:normal;color:var(--line-2);width:16px;text-align:center}
+.hk-cond input{width:16px;height:16px;accent-color:var(--blood)}
+.hk-cond.ok{color:var(--washi)}
+.hk-cond.ok i{color:var(--blood-hi)}
+.hk-draw{justify-self:start;margin-top:4px}
+.hk-draw:disabled{filter:grayscale(.7);opacity:.5}
+
+/* preço */
+.is-drawn .hk-price{border-style:solid;border-color:#5a1420}
+.hk-track{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.hk-step{display:grid;place-items:center;min-height:32px;border:1px solid var(--line);border-radius:2px;color:var(--ash);font:600 13px var(--sans);background:#0d0a0a}
+.hk-step.paid{border-color:var(--blood);background:linear-gradient(180deg,#7a0618,#3a0610);color:#fff}
+.hk-step.next{border-color:var(--blood-hi);color:var(--blood-hi);box-shadow:0 0 12px #c3122f66}
+.hk-price-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hk-silence{justify-self:start;color:var(--washi-2)}
+
+/* códex */
+.hk-lore{display:grid;gap:10px}
+.hk-lore-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hk-lore-bar .eyebrow{margin:0}
+.hk-lore-bar button{min-height:30px;padding:4px 12px;font-size:12px}
+.hk-lore-view{display:grid;gap:14px;padding:18px clamp(14px,3vw,24px);border:1px solid var(--line);border-radius:3px;
+  background:radial-gradient(ellipse 90% 40% at 50% 0%,#c3122f14,transparent 70%),#0c0a0a}
+.hk-codex{display:grid;gap:10px;color:var(--washi-2);font-size:14px;line-height:1.65}
+.hk-codex p{margin:0}
+.hk-sec{display:grid;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.hk-sec h4{display:flex;align-items:baseline;gap:10px;margin:0;font:700 13px var(--sans);letter-spacing:.16em;color:var(--washi)}
+.hk-num{font:600 22px var(--serif);letter-spacing:0;color:var(--blood-hi);min-width:28px}
+.hk-quote{margin:4px 0;padding:6px 0 6px 16px;border-left:2px solid var(--blood);font:italic 500 19px/1.45 var(--serif);color:var(--washi)}
+.hk-stat{display:grid;grid-template-columns:minmax(110px,max-content) minmax(0,1fr);gap:12px;padding:6px 10px;border-radius:2px;background:#151010}
+.hk-stat dt{color:var(--ash);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding-top:2px}
+.hk-stat dd{margin:0;color:var(--washi)}
+.hk-trait b{font-family:var(--serif);font-size:16px;color:var(--blood-hi)}
+.hk-list{display:grid;gap:4px;margin:0;padding-left:18px}
+.hk-list li::marker{color:var(--blood)}
+.hk-list b{color:var(--washi)}
+
+/* lâmina fora */
+.hk-card.hk-drawn{box-shadow:0 0 0 1px var(--blood),0 18px 50px #c3122f33}
+@media (prefers-reduced-motion:no-preference){
+  .hk-card.hk-drawn{animation:hk-throb 2.4s ease-in-out infinite}
+  .is-drawn .hk-ribbon-glyph{animation:hk-throb-glyph 1.2s ease-in-out infinite}
+  body.hk-unsheathe main{animation:hk-draw-flash 1.3s ease both}
+}
+@keyframes hk-throb{50%{box-shadow:0 0 0 1px var(--blood-hi),0 18px 70px #c3122f66}}
+@keyframes hk-throb-glyph{50%{box-shadow:0 0 34px var(--blood-hi)}}
+@keyframes hk-draw-flash{0%{filter:none}12%{filter:brightness(1.6) saturate(2) hue-rotate(-10deg)}40%{filter:saturate(1.4)}100%{filter:none}}
+
+@media (max-width:620px){
+  .hk-forms{grid-template-columns:1fr}
+  .hk-hands{margin-left:0}
+  .hk-stat{grid-template-columns:1fr;gap:2px}
+}
+@media print{.hk-actions,.hk-wake button,.hk-price button,.hk-lore-bar button{display:none!important}.hk-card .cursed-texts{display:none!important}}
