@@ -533,6 +533,8 @@ dialog[open]{animation:dialog-in .3s var(--ease)}
 .dialog-heading button{width:40px;padding:0;font-size:22px;border:0;background:none}
 .preference{display:block;margin:14px 0;color:var(--washi)}
 .music{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:18px 0;padding:16px 0;border-block:1px solid var(--line)}
+.music .track-name{flex-basis:100%;font-size:15px;letter-spacing:.08em;color:var(--washi-2)}
+.music .track-name small{margin-left:8px;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
 .music label{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--washi-2)}
 .music input[type=file]{max-width:100%;border:0;font-size:12px}
 #preferences .toolbar{margin:0;justify-content:flex-start}

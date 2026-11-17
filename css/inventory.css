@@ -1,0 +1,129 @@
+/* ---------- Inventário com durabilidade ---------- */
+:root{
+  --pd-ok:#86b07c;      /* Conservado */
+  --pd-worn:#d8b36a;    /* Desgastado (kin) */
+  --pd-hurt:#e8913f;    /* Danificado */
+  --pd-crit:#ff6a52;    /* Crítico */
+  --pd-broken:#8a7f72;  /* Quebrado */
+  --pd-art:#9d8cff;     /* Artefato */
+}
+[data-state="conservado"]{--pd:var(--pd-ok)}
+[data-state="desgastado"]{--pd:var(--pd-worn)}
+[data-state="danificado"]{--pd:var(--pd-hurt)}
+[data-state="critico"]{--pd:var(--pd-crit)}
+[data-state="quebrado"]{--pd:var(--pd-broken)}
+[data-state="artefato"]{--pd:var(--pd-art)}
+
+/* Filtros */
+.inv-filters{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 16px}
+.inv-chip{min-height:34px;padding:5px 12px;border-radius:999px;font-size:12.5px;letter-spacing:.03em}
+.inv-chip small{margin-left:4px;color:var(--ash);font-weight:600}
+.inv-chip[aria-pressed="true"]{border-color:var(--kin);background:#d8b36a1c;color:var(--kin)}
+.inv-chip[aria-pressed="true"] small{color:var(--kin)}
+
+/* Lista + detalhe */
+.inv-layout{display:grid;gap:16px;align-items:start}
+@media (min-width:980px){
+  .inv-layout:has(#item-detail:not([hidden])){grid-template-columns:minmax(0,1fr) minmax(320px,400px)}
+  .inv-layout #item-detail{position:sticky;top:150px;max-height:calc(100dvh - 170px);overflow:auto}
+}
+.inv-layout #item-detail{margin-top:0}
+.item.inv-item{align-items:start}
+.item.inv-item .inventory-name{display:grid;gap:3px;justify-items:start;width:100%;min-width:0;padding:8px 8px 9px}
+.item.inv-item .inventory-name span{min-height:0;padding:0;border:0}
+.item.inv-item .inventory-name .pd-meter{background:#ffffff14}
+.inv-title{font-size:14.5px;line-height:1.3;color:var(--washi);overflow-wrap:anywhere}
+.item.equipped .inv-title::before{content:"◆ ";color:var(--kin);font-size:11px}
+.inv-sub{font-size:11.5px;color:var(--ash);line-height:1.35}
+.item.inv-item.selected{border-color:var(--kin);background:#1a1513}
+.item.inv-item[data-state="quebrado"] .inv-title{text-decoration:line-through;text-decoration-color:var(--pd-broken)}
+.item.inv-item>input,.item.inv-item>button:last-child{margin-top:6px}
+.pd-text{font-size:11.5px;font-weight:600;color:var(--pd,var(--washi-2));font-variant-numeric:tabular-nums}
+.pd-pending{font-size:11.5px;color:var(--shu-hi)}
+.inv-empty{grid-column:1/-1;margin:6px 0}
+
+/* Barra de PD */
+.pd-meter{position:relative;display:block;width:100%;height:4px;margin-top:4px;border-radius:2px;background:#ffffff14;overflow:hidden}
+.pd-meter i{position:absolute;inset:0 auto 0 0;background:var(--pd,var(--washi-2));border-radius:inherit;transition:width .3s var(--ease)}
+.pd-meter.big{height:8px;margin:10px 0 4px}
+.pd-meter.big b{position:absolute;top:0;bottom:0;width:1px;background:#0a0909aa}
+
+/* Painel de detalhe */
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.detail-head h3{margin:0;font:600 24px/1.2 var(--serif);overflow-wrap:anywhere}
+.detail-head .icon-btn{flex:none;width:36px;min-height:36px;padding:0;font-size:18px}
+.dur-box{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.dur-box .eyebrow{color:var(--kin);font-size:11px;letter-spacing:.18em;font-weight:700}
+.dur-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 12px}
+.dur-grid .editor-label{margin:10px 0 0}
+.dur-grid select,.calc-top select,.wear-tools select{width:100%;min-height:40px}
+.editor-label select{color:var(--washi);font-weight:400;letter-spacing:0}
+.pd-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:14px}
+.pd-value{display:flex;align-items:baseline;gap:6px;font:600 15px var(--sans);color:var(--washi-2)}
+.pd-value input{width:76px;padding:4px 6px;border:1px solid var(--line-2);border-radius:2px;background:#0d0a0a;font:600 28px/1 var(--serif);color:var(--washi);text-align:right}
+.pd-state{font:700 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--pd)}
+.pd-penalties{margin:8px 0 0;padding-left:18px;color:var(--washi-2);font-size:13px;line-height:1.6}
+.dur-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.dur-actions button{flex:1 1 auto;min-height:40px;font-size:13px}
+.dur-hint{display:block;margin-top:8px;color:var(--ash);font-size:12px;line-height:1.5}
+.dur-loss{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:var(--washi-2)}
+.dur-loss span{flex:1 1 100%;font-weight:600;letter-spacing:.06em}
+.dur-loss input{width:72px;min-height:38px;padding:6px 8px;border:1px solid var(--line-2);border-radius:2px;background:#0d0a0a;text-align:center}
+.dur-status:empty{display:none}
+.dur-log{margin-top:12px;font-size:12.5px;color:var(--washi-2)}
+.dur-log summary,.item-fields summary{cursor:pointer;color:var(--washi-2);font-size:12.5px;font-weight:600;letter-spacing:.04em}
+.dur-log ol{margin:8px 0 0;padding-left:18px;line-height:1.6}
+.item-fields{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+#add-item select{min-height:44px;max-width:240px}
+
+/* Calculadora */
+.wear-calc,.wear-tools{margin-top:18px}
+.calc-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0 12px}
+.calc-top .editor-label{margin:8px 0}
+.calc-top .narrow input{min-height:40px}
+.calc-now{display:grid;gap:4px;margin:10px 0 14px;font-size:13px;color:var(--washi-2)}
+.calc-now .pd-meter{height:6px}
+.calc-events{display:flex;flex-wrap:wrap;gap:8px}
+.calc-events .ev{min-height:40px;font-size:13px;text-align:left}
+.calc-events .ev small{margin-left:4px;color:var(--ash);font-weight:600}
+.calc-events .ev b{color:var(--shu-hi)}
+.calc-events .ev[aria-pressed="true"]{border-color:var(--shu);background:#e8432c22;color:#fff}
+.calc-events .ev[aria-pressed="true"] small{color:var(--shu-hi)}
+.ev-range{display:flex;gap:0}
+.ev-range .ev{border-top-right-radius:0;border-bottom-right-radius:0}
+.ev-range select{min-height:40px;border-left:0}
+.calc-extras{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.calc-inline{display:flex;gap:0}
+.calc-inline input{width:76px;min-height:40px;padding:6px 8px;border:1px solid var(--line-2);border-right:0;border-radius:2px 0 0 2px;background:#0d0a0a;text-align:center}
+.calc-inline button{min-height:40px;font-size:13px}
+.calc-log{display:grid;gap:4px;margin:14px 0 0;padding:0;list-style:none;counter-reset:ev}
+.calc-log li{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:4px 4px 4px 10px;border:1px solid var(--line);border-radius:2px;background:#0f0c0c;font-size:13px;counter-increment:ev}
+.calc-log li::before{content:counter(ev);color:var(--ash);font-size:11px;font-variant-numeric:tabular-nums}
+.calc-log b{color:var(--shu-hi);font-variant-numeric:tabular-nums}
+.calc-log .icon-btn{width:32px;min-height:32px;padding:0}
+.calc-result{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;margin:16px 0 0;padding:14px 16px;border:1px solid var(--line-2);border-radius:3px;background:#0d0a0a;font-size:13.5px}
+.calc-result dt{color:var(--washi-2)}
+.calc-result dd{margin:0;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.calc-result dd.big{font:600 22px/1 var(--serif);color:var(--shu-hi)}
+.calc-result dd[class^="state-"]{text-transform:uppercase;letter-spacing:.1em;font-size:12px}
+.calc-result .state-conservado{color:var(--pd-ok)}.calc-result .state-desgastado{color:var(--pd-worn)}
+.calc-result .state-danificado{color:var(--pd-hurt)}.calc-result .state-critico{color:var(--pd-crit)}
+.calc-result .state-quebrado{color:var(--pd-broken)}.calc-result .state-artefato{color:var(--pd-art)}
+.calc-warn{margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--shu);background:#e8432c14;color:#ffd7cf;font-size:13px}
+.calc-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+
+/* Cálculos rápidos */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.tool{display:grid;align-content:start;gap:2px;padding:14px;border:1px solid var(--line);border-radius:3px;background:#0f0c0c}
+.tool h4{margin:0 0 4px;font:600 18px var(--serif);color:var(--washi)}
+.tool .editor-label{margin:6px 0}
+.tool output{display:block;margin-top:6px;font:600 17px/1.35 var(--serif);color:var(--kin)}
+.tool small{color:var(--ash);font-size:11.5px;line-height:1.5}
+
+@media (max-width:640px){
+  #add-item select{max-width:none;flex:1 1 100%}
+  .calc-events .ev{flex:1 1 100%}
+  .ev-range{flex:1 1 100%}.ev-range .ev{flex:1}
+  .calc-inline{flex:1 1 100%}.calc-inline button{flex:1}
+}
