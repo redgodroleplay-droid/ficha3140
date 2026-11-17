@@ -1,6 +1,7 @@
 /* Inventário com Durabilidade de Armas e Armaduras (regra opcional da mesa)
-   e calculadora de desgaste. Os dados ficam em state.items[i][2] (meta do item)
-   e viajam no backup JSON via window.extendBackup. */
+   e calculadora de desgaste. Vale para os itens do inventário (meta em
+   state.items[i][2]) e para as armas do Arsenal maldito (state.cursedWeapons[i].dur).
+   Tudo viaja no backup JSON via window.extendBackup. */
 (() => {
   /* ---------- Regras ---------- */
   const GEAR = {
@@ -128,6 +129,33 @@
   }
   window.durability = { GEAR, RARITY, info, stateOf, accelerate, sunder, resolveCombat, repairCost };
 
+  /* ---------- Arsenal maldito ---------- */
+  function guessRarity(text) {
+    const t = String(text || '').toLocaleLowerCase();
+    if (/artefato/.test(t)) return 'artefato';
+    if (/lend[aá]ri/.test(t)) return 'lendario';
+    if (/muito\s*rar/.test(t)) return 'muito-raro';
+    if (/\brar[oa]/.test(t)) return 'raro';
+    if (/incomum/.test(t)) return 'incomum';
+    return 'comum';
+  }
+  function guessGear(text) {
+    const t = String(text || '').toLocaleLowerCase();
+    if (/improvis/.test(t)) return 'w-improv';
+    if (/duas m[aã]os|montante|nodachi|[oō]dachi|grande/.test(t)) return 'w-heavy';
+    if (/adaga|faca|punhal|tant[oō]/.test(t)) return 'w-metal';
+    return 'w-martial';
+  }
+  /* Durabilidade de uma arma amaldiçoada (criada na primeira vez que aparece). */
+  function cursedDur(w) {
+    if (!w.dur || typeof w.dur !== 'object' || !GEAR[w.dur.gear]) {
+      w.dur = { gear: guessGear(w.type), rarity: guessRarity(w.rarity), material: 'metal' };
+    }
+    normalizeMeta(w.dur);
+    return w.dur;
+  }
+  const cursedName = w => w.name || 'Arma amaldiçoada';
+
   /* ---------- Migração e backup ---------- */
   if (!state.durabilityV1) {
     const guess = { 'katana': ['w-martial', 'metal'], 'faca pequena': ['w-metal', 'metal'], 'besta leve': ['w-wood', 'madeira'] };
@@ -141,6 +169,19 @@
   }
   state.items.forEach(item => normalizeMeta(item[2]));
 
+  function sanitizeMeta(m, out) {
+    if (GEAR[m.gear]) out.gear = m.gear;
+    if (RARITY[m.rarity]) out.rarity = m.rarity;
+    if (MATERIAL[m.material]) out.material = m.material;
+    if (Number.isFinite(m.pd)) out.pd = m.pd;
+    if (typeof m.price === 'string' || Number.isFinite(m.price)) out.price = String(m.price).slice(0, 20);
+    for (const f of ['maintShort', 'maintLong']) if (typeof m[f] === 'boolean') out[f] = m[f];
+    if (Array.isArray(m.combat)) out.combat = m.combat.filter(e => e && typeof e.k === 'string' && Number.isFinite(e.n))
+      .slice(0, 100).map(e => ({ k: e.k.slice(0, 20), label: String(e.label || '').slice(0, 80), n: clamp(int(e.n), 0, 200) }));
+    if (Array.isArray(m.log)) out.log = m.log.filter(e => e && typeof e.t === 'string').slice(0, 8).map(e => ({ d: String(e.d || '').slice(0, 20), t: e.t.slice(0, 240) }));
+    normalizeMeta(out);
+    return out;
+  }
   const previousExtend = window.extendBackup;
   window.extendBackup = (data, clean) => {
     if (typeof previousExtend === 'function') previousExtend(data, clean);
@@ -148,18 +189,14 @@
     data.items.forEach((raw, i) => {
       const m = Array.isArray(raw) ? raw[2] : null;
       if (!m || typeof m !== 'object' || !clean.items[i]) return;
-      const out = clean.items[i][2] ||= {};
-      if (GEAR[m.gear]) out.gear = m.gear;
-      if (RARITY[m.rarity]) out.rarity = m.rarity;
-      if (MATERIAL[m.material]) out.material = m.material;
-      if (Number.isFinite(m.pd)) out.pd = m.pd;
-      if (typeof m.price === 'string' || Number.isFinite(m.price)) out.price = String(m.price).slice(0, 20);
-      for (const f of ['maintShort', 'maintLong']) if (typeof m[f] === 'boolean') out[f] = m[f];
-      if (Array.isArray(m.combat)) out.combat = m.combat.filter(e => e && typeof e.k === 'string' && Number.isFinite(e.n))
-        .slice(0, 100).map(e => ({ k: e.k.slice(0, 20), label: String(e.label || '').slice(0, 80), n: clamp(int(e.n), 0, 200) }));
-      if (Array.isArray(m.log)) out.log = m.log.filter(e => e && typeof e.t === 'string').slice(0, 8).map(e => ({ d: String(e.d || '').slice(0, 20), t: e.t.slice(0, 240) }));
-      normalizeMeta(out);
+      sanitizeMeta(m, clean.items[i][2] ||= {});
     });
+    /* o Arsenal filtra as armas do mesmo jeito: os índices batem */
+    if (Array.isArray(data.cursedWeapons) && Array.isArray(clean.cursedWeapons)) {
+      data.cursedWeapons.filter(w => w && typeof w === 'object').forEach((w, i) => {
+        if (w.dur && typeof w.dur === 'object' && GEAR[w.dur.gear] && clean.cursedWeapons[i]) clean.cursedWeapons[i].dur = sanitizeMeta(w.dur, {});
+      });
+    }
   };
 
   /* ---------- Utilidades de interface ---------- */
@@ -177,7 +214,8 @@
     s.onchange = () => onChange(s.value);
     return s;
   }
-  const gearOptions = withNone => [...(withNone ? [['', 'Sem durabilidade']] : []), ...GEAR_GROUPS.map(([g, keys]) => [g, keys.map(k => [k, GEAR[k].label + ' · ' + GEAR[k].pd + ' PD'])])];
+  const gearOptions = (withNone, only) => [...(withNone ? [['', 'Sem durabilidade']] : []),
+    ...GEAR_GROUPS.filter(([g]) => !only || g === only).map(([g, keys]) => [g, keys.map(k => [k, GEAR[k].label + ' · ' + GEAR[k].pd + ' PD'])])];
   const rarityOptions = () => Object.entries(RARITY).map(([k, r]) => [k, r.label + (r.immune ? ' · sem desgaste' : r.bonus ? ' · +' + r.bonus + ' PD, −' + r.cut + '/combate' : '')]);
   const materialOptions = () => Object.entries(MATERIAL).map(([k, [label]]) => [k, label]);
   function wrap(label, control, cls) { const w = el('label', label, 'editor-label ' + (cls || '')); w.append(control); return w; }
@@ -204,6 +242,9 @@
     meta.log.length = Math.min(meta.log.length, 8);
   }
   const firstDice = text => (String(text || '').match(/\d*d\d+(?:\s*[+-]\s*(?:\d*d\d+|\d+|FOR|DES|CON|INT|SAB|CAR|PB|NIV))*/i) || [])[0];
+
+  /* Redesenha tudo que mostra durabilidade. */
+  function refresh() { renderItems(); renderArsenal(); }
 
   /* ---------- Lista ---------- */
   let filter = 'all', selected = -1;
@@ -281,9 +322,10 @@
     renderFilters();
   }
 
-  /* ---------- Detalhe do item ---------- */
-  function notify(text) {
-    const status = $('#item-detail .dur-status');
+  /* ---------- Ações de durabilidade (inventário e Arsenal) ----------
+     target = { name, meta, box } — box é o bloco que mostra o status. */
+  function notify(target, text) {
+    const status = target.box?.isConnected ? target.box.querySelector('.dur-status') : null;
     if (status) status.textContent = text; else alert(text);
   }
   function directLoss(meta, n, why) {
@@ -294,43 +336,149 @@
     logIt(meta, why + ': −' + (before - after) + ' PD (' + before + ' → ' + after + ')' + extra);
     return after === 0 && before > 0;
   }
-  function selfRepair(item, mode) {
-    const meta = item[2], i = info(meta);
-    if (meta.pd <= 0) return notify('Equipamento quebrado: só um profissional pode restaurá-lo.');
-    if (meta.pd >= i.max) return notify('Já está com a durabilidade máxima.');
+  function selfRepair(target, mode) {
+    const { meta, name } = target, i = info(meta);
+    if (meta.pd <= 0) return notify(target, 'Equipamento quebrado: só um profissional pode restaurá-lo.');
+    if (meta.pd >= i.max) return notify(target, 'Já está com a durabilidade máxima.');
     const flag = mode === 'short' ? 'maintShort' : 'maintLong';
-    if (meta[flag]) return notify(mode === 'short' ? 'A manutenção já foi feita neste descanso curto.' : 'O reparo já foi feito neste descanso longo.');
+    if (meta[flag]) return notify(target, mode === 'short' ? 'A manutenção já foi feita neste descanso curto.' : 'O reparo já foi feito neste descanso longo.');
     const tool = MATERIAL[meta.material]?.[1] || 'ferramentas apropriadas';
-    if (!confirm((mode === 'short' ? 'Manutenção (descanso curto, 10 min)' : 'Reparo (descanso longo, 1 h)') + ' em “' + item[0] + '”.\n\nExige ' + tool + ' e proficiência com elas. Continuar?')) return;
+    if (!confirm((mode === 'short' ? 'Manutenção (descanso curto, 10 min)' : 'Reparo (descanso longo, 1 h)') + ' em “' + name + '”.\n\nExige ' + tool + ' e proficiência com elas. Continuar?')) return;
     const pb = int(state.prof, 2);
     const dice = mode === 'short' ? [die(6)] : [die(10), die(10)];
     const gain = dice.reduce((a, b) => a + b, 0) + pb, before = meta.pd;
     meta.pd = Math.min(i.max, before + gain);
     meta[flag] = true;
     logIt(meta, (mode === 'short' ? 'Manutenção' : 'Reparo no descanso longo') + ': +' + (meta.pd - before) + ' PD (' + before + ' → ' + meta.pd + ')');
-    save(); renderItems();
-    rollResult((mode === 'short' ? 'Manutenção · ' : 'Reparo · ') + item[0], '+' + (meta.pd - before),
+    save(); refresh();
+    rollResult((mode === 'short' ? 'Manutenção · ' : 'Reparo · ') + name, '+' + (meta.pd - before),
       (mode === 'short' ? '1d6' : '2d10') + ' [' + dice.join(', ') + '] + PB ' + pb + ' = ' + gain + ' · PD ' + before + ' → ' + meta.pd + ' / ' + i.max);
   }
-  function proRepair(item) {
-    const meta = item[2], i = info(meta), restored = i.max - meta.pd;
-    if (restored <= 0) return notify('Já está com a durabilidade máxima.');
+  function proRepair(target) {
+    const { meta, name } = target, i = info(meta), restored = i.max - meta.pd;
+    if (restored <= 0) return notify(target, 'Já está com a durabilidade máxima.');
     const base = price(meta.price);
-    if (!base) return notify('Informe o preço original (PO) para calcular o custo do reparo.');
+    if (!base) return notify(target, 'Informe o preço original (PO) para calcular o custo do reparo.');
     const cost = repairCost(base, restored);
     const gold = Number(state.gold) || 0;
-    if (cost > gold) return notify('Reparo custa ' + coins(cost) + ', mas há só ' + coins(gold) + '.');
+    if (cost > gold) return notify(target, 'Reparo custa ' + coins(cost) + ', mas há só ' + coins(gold) + '.');
     const extra = meta.pd <= 0 && i.magic ? '\n\nItem mágico quebrado: pode exigir artesão especializado, materiais raros ou procedimentos arcanos.' : '';
-    if (!confirm('Reparo profissional de “' + item[0] + '”: restaurar ' + restored + ' PD por ' + coins(cost) + '.\nO valor sai do ouro (' + coins(gold) + '). O tempo de reparo fica a cargo do Mestre.' + extra)) return;
+    if (!confirm('Reparo profissional de “' + name + '”: restaurar ' + restored + ' PD por ' + coins(cost) + '.\nO valor sai do ouro (' + coins(gold) + '). O tempo de reparo fica a cargo do Mestre.' + extra)) return;
     state.gold = Math.round((gold - cost) * 100) / 100;
     $('#gold').value = state.gold;
     const before = meta.pd;
     meta.pd = i.max;
     logIt(meta, 'Reparo profissional: ' + before + ' → ' + i.max + ' PD por ' + coins(cost));
-    save(); renderItems();
-    notify('Restaurado por ' + coins(cost) + '.');
+    save(); refresh();
+    notify(target, 'Restaurado por ' + coins(cost) + '.');
   }
 
+  /* Bloco de durabilidade reutilizado no detalhe do item e nos cartões do Arsenal.
+     opts: { allowNone, only (grupo de tipos), onGear(v) } */
+  function durabilityBox(target, opts = {}) {
+    const { meta } = target;
+    const box = el('section', undefined, 'dur-box');
+    target.box = box;
+    box.append(el('div', 'DURABILIDADE', 'eyebrow'));
+    const i = info(meta);
+    const grid = el('div', undefined, 'dur-grid');
+    grid.append(wrap('Tipo de equipamento', select(gearOptions(opts.allowNone, opts.only), meta.gear || '', v => {
+      const had = info(meta), wasFull = !had || meta.pd >= had.max;
+      if (!v) { delete meta.gear; } else { meta.gear = v; if (!meta.material) meta.material = v === 'w-wood' ? 'madeira' : v === 'a-light' ? 'couro' : 'metal'; }
+      if (v) { if (wasFull) meta.pd = info(meta).max; normalizeMeta(meta); }
+      save(); refresh();
+    }, 'Tipo de equipamento')));
+    if (i) {
+      grid.append(wrap('Raridade', select(rarityOptions(), meta.rarity || 'comum', v => {
+        const wasFull = meta.pd >= i.max;
+        meta.rarity = v;
+        if (wasFull) meta.pd = info(meta).max;
+        normalizeMeta(meta); save(); refresh();
+      }, 'Raridade')));
+      grid.append(wrap('Material (ferramentas)', select(materialOptions(), meta.material || 'metal', v => { meta.material = v; save(); }, 'Material')));
+      const priceIn = el('input'); priceIn.inputMode = 'decimal'; priceIn.value = meta.price || ''; priceIn.placeholder = 'ex.: 15';
+      priceIn.onchange = () => { meta.price = priceIn.value.trim(); save(); refresh(); };
+      grid.append(wrap('Preço original (PO)', priceIn));
+    }
+    box.append(grid);
+    if (!i) {
+      box.append(el('p', 'Escolha um tipo para controlar a durabilidade (armas, armaduras e escudos).', 'detail'));
+      return box;
+    }
+
+    const st = i.immune ? 'artefato' : stateOf(meta.pd, i.max);
+    box.dataset.state = st;
+    const pdRow = el('div', undefined, 'pd-row');
+    const pdIn = numberInput(meta.pd, 0, i.max, 'Pontos de Durabilidade atuais');
+    pdIn.onchange = () => { meta.pd = clamp(int(pdIn.value, meta.pd), 0, i.max); save(); refresh(); };
+    const value = el('div', undefined, 'pd-value');
+    value.append(pdIn, el('span', '/ ' + i.max + ' PD'));
+    const label = el('strong', STATE_LABEL[st], 'pd-state');
+    label.dataset.state = st;
+    pdRow.append(value, label);
+    box.append(pdRow, meterEl(meta, i, true));
+    const pen = el('ul', undefined, 'pd-penalties');
+    (i.immune ? ['Não sofre desgaste convencional, salvo circunstâncias extraordinárias (Mestre).'] : penalties(i.kind, st, i.magic)).forEach(t => pen.append(el('li', t)));
+    box.append(pen);
+    if (meta.combat.length) box.append(el('p', '⚔ ' + pendingOf(meta) + ' PD registrados no combate atual (ainda não aplicados).', 'pd-pending'));
+
+    const actions = el('div', undefined, 'dur-actions');
+    const pb = int(state.prof, 2);
+    const shortBtn = el('button', meta.maintShort ? 'Manutenção feita ✓' : 'Manutenção · 1d6+' + pb);
+    shortBtn.type = 'button';
+    shortBtn.title = 'Descanso curto, 10 minutos';
+    shortBtn.disabled = meta.maintShort || meta.pd <= 0 || meta.pd >= i.max;
+    shortBtn.onclick = () => selfRepair(target, 'short');
+    const longBtn = el('button', meta.maintLong ? 'Reparo feito ✓' : 'Reparo · 2d10+' + pb);
+    longBtn.type = 'button';
+    longBtn.title = 'Descanso longo, 1 hora de atividade leve';
+    longBtn.disabled = meta.maintLong || meta.pd <= 0 || meta.pd >= i.max;
+    longBtn.onclick = () => selfRepair(target, 'long');
+    const cost = repairCost(price(meta.price), i.max - meta.pd);
+    const proBtn = el('button', 'Ferreiro' + (cost ? ' · ' + coins(cost) : ''), meta.pd <= 0 ? 'red' : '');
+    proBtn.type = 'button';
+    proBtn.title = 'Reparo profissional: 1% do preço a cada 10 PD, mínimo 1 PO';
+    proBtn.disabled = meta.pd >= i.max;
+    proBtn.onclick = () => proRepair(target);
+    const fight = el('button', '⚔ Registrar combate');
+    fight.type = 'button';
+    fight.onclick = () => {
+      calcTarget = meta;
+      if (!$('#inventario').classList.contains('active')) openTab('inventario');
+      renderCalc();
+      calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      calc.querySelector('select')?.focus({ preventScroll: true });
+    };
+    actions.append(shortBtn, longBtn, proBtn, fight);
+    box.append(actions, el('small', 'Ferramentas: ' + (MATERIAL[meta.material]?.[1] || 'apropriadas') + ', com proficiência. Uma vez por descanso; não restaura item quebrado.', 'dur-hint'));
+
+    const loss = el('form', undefined, 'dur-loss');
+    const lossIn = numberInput(1, 1, 200, 'PD perdidos fora de combate');
+    loss.append(el('span', 'Fora de combate'), lossIn, el('button', 'Aplicar perda'));
+    loss.onsubmit = e => {
+      e.preventDefault();
+      const n = Math.max(0, int(lossIn.value));
+      if (!n) return;
+      const broke = directLoss(meta, n, 'Fora de combate');
+      save(); refresh();
+      notify(target, broke ? target.name + ' quebrou.' : '−' + n + ' PD aplicados (sem Desgaste Acelerado).');
+    };
+    box.append(loss);
+    const status = el('p', '', 'session-status dur-status');
+    status.setAttribute('role', 'status');
+    box.append(status);
+    if (meta.log.length) {
+      const hist = el('details', undefined, 'dur-log');
+      hist.append(el('summary', 'Histórico de desgaste (' + meta.log.length + ')'));
+      const ol = el('ol');
+      meta.log.forEach(l => ol.append(el('li', l.d + ' · ' + l.t)));
+      hist.append(ol);
+      box.append(hist);
+    }
+    return box;
+  }
+
+  /* ---------- Detalhe do item ---------- */
   renderItemDetail = function () {
     const panel = $('#item-detail');
     const item = state.items[selected];
@@ -344,100 +492,11 @@
     close.setAttribute('aria-label', 'Fechar detalhes');
     close.onclick = () => { const idx = selected; selected = -1; renderList(); renderItemDetail(); $('#items [data-idx="' + idx + '"] .inventory-name')?.focus(); };
     head.append(el('h3', item[0]), close);
-    panel.append(head);
-
-    /* Durabilidade */
-    const box = el('section', undefined, 'dur-box');
-    box.append(el('div', 'DURABILIDADE', 'eyebrow'));
-    const i = info(meta);
-    const grid = el('div', undefined, 'dur-grid');
-    grid.append(wrap('Tipo de equipamento', select(gearOptions(true), meta.gear || '', v => {
-      const had = info(meta), wasFull = !had || meta.pd >= had.max;
-      if (!v) { delete meta.gear; } else { meta.gear = v; if (!meta.material) meta.material = v === 'w-wood' ? 'madeira' : v === 'a-light' ? 'couro' : 'metal'; }
-      if (v) { if (wasFull) meta.pd = info(meta).max; normalizeMeta(meta); }
-      save(); renderItems();
-    }, 'Tipo de equipamento')));
-    if (i) {
-      grid.append(wrap('Raridade', select(rarityOptions(), meta.rarity || 'comum', v => {
-        const wasFull = meta.pd >= i.max;
-        meta.rarity = v;
-        if (wasFull) meta.pd = info(meta).max;
-        normalizeMeta(meta); save(); renderItems();
-      }, 'Raridade')));
-      grid.append(wrap('Material (ferramentas)', select(materialOptions(), meta.material || 'metal', v => { meta.material = v; save(); }, 'Material')));
-      const priceIn = el('input'); priceIn.inputMode = 'decimal'; priceIn.value = meta.price || ''; priceIn.placeholder = 'ex.: 15';
-      priceIn.onchange = () => { meta.price = priceIn.value.trim(); save(); renderItemDetail(); };
-      grid.append(wrap('Preço original (PO)', priceIn));
-    }
-    box.append(grid);
-
-    if (i) {
-      const st = i.immune ? 'artefato' : stateOf(meta.pd, i.max);
-      const pdRow = el('div', undefined, 'pd-row');
-      const pdIn = numberInput(meta.pd, 0, i.max, 'Pontos de Durabilidade atuais');
-      pdIn.onchange = () => { meta.pd = clamp(int(pdIn.value, meta.pd), 0, i.max); save(); renderItems(); };
-      const value = el('div', undefined, 'pd-value');
-      value.append(pdIn, el('span', '/ ' + i.max + ' PD'));
-      const label = el('strong', STATE_LABEL[st], 'pd-state');
-      label.dataset.state = st;
-      pdRow.append(value, label);
-      box.append(pdRow, meterEl(meta, i, true));
-      const pen = el('ul', undefined, 'pd-penalties');
-      (i.immune ? ['Não sofre desgaste convencional, salvo circunstâncias extraordinárias (Mestre).'] : penalties(i.kind, st, i.magic)).forEach(t => pen.append(el('li', t)));
-      box.append(pen);
-      if (meta.combat.length) box.append(el('p', '⚔ ' + pendingOf(meta) + ' PD registrados no combate atual (ainda não aplicados).', 'pd-pending'));
-
-      const actions = el('div', undefined, 'dur-actions');
-      const pb = int(state.prof, 2);
-      const shortBtn = el('button', meta.maintShort ? 'Manutenção feita ✓' : 'Manutenção · 1d6+' + pb);
-      shortBtn.title = 'Descanso curto, 10 minutos';
-      shortBtn.disabled = meta.maintShort || meta.pd <= 0 || meta.pd >= i.max;
-      shortBtn.onclick = () => selfRepair(item, 'short');
-      const longBtn = el('button', meta.maintLong ? 'Reparo feito ✓' : 'Reparo · 2d10+' + pb);
-      longBtn.title = 'Descanso longo, 1 hora de atividade leve';
-      longBtn.disabled = meta.maintLong || meta.pd <= 0 || meta.pd >= i.max;
-      longBtn.onclick = () => selfRepair(item, 'long');
-      const cost = repairCost(price(meta.price), i.max - meta.pd);
-      const proBtn = el('button', 'Ferreiro' + (cost ? ' · ' + coins(cost) : ''), meta.pd <= 0 ? 'red' : '');
-      proBtn.title = 'Reparo profissional: 1% do preço a cada 10 PD, mínimo 1 PO';
-      proBtn.disabled = meta.pd >= i.max;
-      proBtn.onclick = () => proRepair(item);
-      const fight = el('button', '⚔ Registrar combate');
-      fight.onclick = () => { calcTarget = item; renderCalc(); calc.scrollIntoView({ behavior: 'smooth', block: 'start' }); calc.querySelector('select')?.focus({ preventScroll: true }); };
-      actions.append(shortBtn, longBtn, proBtn, fight);
-      box.append(actions, el('small', 'Ferramentas: ' + (MATERIAL[meta.material]?.[1] || 'apropriadas') + ', com proficiência. Uma vez por descanso; não restaura item quebrado.', 'dur-hint'));
-
-      const loss = el('form', undefined, 'dur-loss');
-      const lossIn = numberInput(1, 1, 200, 'PD perdidos fora de combate');
-      loss.append(el('span', 'Fora de combate'), lossIn, el('button', 'Aplicar perda'));
-      loss.onsubmit = e => {
-        e.preventDefault();
-        const n = Math.max(0, int(lossIn.value));
-        if (!n) return;
-        const broke = directLoss(meta, n, 'Fora de combate');
-        save(); renderItems();
-        notify(broke ? item[0] + ' quebrou.' : '−' + n + ' PD aplicados (sem Desgaste Acelerado).');
-      };
-      box.append(loss);
-      const status = el('p', '', 'session-status dur-status');
-      status.setAttribute('role', 'status');
-      box.append(status);
-      if (meta.log.length) {
-        const hist = el('details', undefined, 'dur-log');
-        hist.append(el('summary', 'Histórico de desgaste (' + meta.log.length + ')'));
-        const ol = el('ol');
-        meta.log.forEach(l => ol.append(el('li', l.d + ' · ' + l.t)));
-        hist.append(ol);
-        box.append(hist);
-      }
-    } else {
-      box.append(el('p', 'Escolha um tipo para controlar a durabilidade (armas, armaduras e escudos).', 'detail'));
-    }
-    panel.append(box);
+    panel.append(head, durabilityBox({ name: item[0], meta }, { allowNone: true }));
 
     /* Dados gerais */
     const fields = el('details', undefined, 'item-fields');
-    fields.open = !i;
+    fields.open = !info(meta);
     fields.append(el('summary', 'Descrição, dano e notas'));
     for (const [key, label] of [['category', 'Categoria'], ['weight', 'Peso unitário'], ['damage', 'Dano'], ['properties', 'Propriedades'], ['description', 'Descrição'], ['notes', 'Observações']]) {
       fields.append(labeledField(label, meta[key], v => { meta[key] = v; save(); }, ['description', 'notes'].includes(key)));
@@ -455,20 +514,49 @@
     panel.append(tools);
   };
 
+  /* ---------- Durabilidade nos cartões do Arsenal ---------- */
+  function renderArsenal() {
+    const root = $('#cursed-weapons');
+    if (!root) return;
+    [...root.children].forEach((card, i) => {
+      const w = state.cursedWeapons[i];
+      if (!w || !card.classList.contains('cursed')) return;
+      const meta = cursedDur(w);
+      const box = durabilityBox({ name: cursedName(w), meta }, { only: 'Armas' });
+      box.classList.add('cursed-dur');
+      const old = card.querySelector(':scope > .cursed-dur');
+      if (old) { old.replaceWith(box); return; }
+      const anchor = card.querySelector(':scope > .cursed-meters') || card.querySelector(':scope > .cursed-activate');
+      if (anchor) anchor.after(box); else card.append(box);
+    });
+  }
+  const arsenalRoot = $('#cursed-weapons');
+  if (arsenalRoot) new MutationObserver(() => {
+    /* só desenha nos cartões novos (o Arsenal recria um cartão ao mudar) */
+    [...arsenalRoot.children].some(card => card.classList.contains('cursed') && !card.querySelector(':scope > .cursed-dur')) && renderArsenal();
+  }).observe(arsenalRoot, { childList: true });
+
   /* ---------- Calculadora de combate ---------- */
   const calc = el('article', undefined, 'card wear-calc');
   calc.id = 'wear-calc';
   const free = { gear: 'w-martial', rarity: 'comum', pd: 46, combat: [], log: [] };
-  let calcTarget = null;
-  const durable = () => state.items.filter(it => info(it[2]));
+  let calcTarget = null; /* meta do equipamento escolhido, ou 'free' */
 
-  function endCombat(item) {
-    const meta = item[2], i = info(meta), before = meta.pd;
+  /* Todos os equipamentos com durabilidade: inventário e Arsenal maldito. */
+  function entries() {
+    const list = [];
+    state.items.forEach(it => { if (info(it[2])) list.push({ name: it[0], meta: it[2], group: it[2].equipped ? 'Equipados' : 'Na bolsa' }); });
+    (state.cursedWeapons || []).forEach(w => list.push({ name: cursedName(w), meta: cursedDur(w), group: 'Arsenal maldito' }));
+    return list;
+  }
+
+  function endCombat(entry) {
+    const { meta } = entry, i = info(meta), before = meta.pd;
     const r = resolveCombat(before, i.max, meta.combat, i.rarity.cut, i.immune);
     meta.pd = r.after;
     logIt(meta, 'Combate: ' + r.raw + ' registrado' + (r.cut ? ', −' + r.cut + ' mágico' : '') + ' → ' + r.final + ' final (' + before + ' → ' + r.after + ')' + (r.broke ? ' · QUEBROU' : ''));
     meta.combat = [];
-    return item[0] + ': −' + (before - r.after) + ' PD (' + before + ' → ' + r.after + ' / ' + i.max + ') · ' + STATE_LABEL[i.immune ? 'artefato' : stateOf(r.after, i.max)] + (r.broke ? ' · ' + r.reason : '');
+    return entry.name + ': −' + (before - r.after) + ' PD (' + before + ' → ' + r.after + ' / ' + i.max + ') · ' + STATE_LABEL[i.immune ? 'artefato' : stateOf(r.after, i.max)] + (r.broke ? ' · ' + r.reason : '');
   }
 
   function renderCalc() {
@@ -478,20 +566,21 @@
     title.append(el('span', '摩耗'));
     calc.append(title, el('p', 'Marque o que aconteceu com cada equipamento durante o combate. Ao encerrar, a calculadora desconta a resistência mágica e aplica o Desgaste Acelerado (×1,10, arredondado para cima) uma única vez.', 'detail'));
 
-    const list = durable();
-    if (calcTarget !== 'free' && !list.includes(calcTarget)) calcTarget = list.find(it => it[2].equipped) || list[0] || 'free';
+    const list = entries();
+    if (calcTarget !== 'free' && !list.some(e => e.meta === calcTarget)) calcTarget = (list.find(e => e.group === 'Equipados') || list[0])?.meta || 'free';
     const options = [];
-    const equipped = list.filter(it => it[2].equipped), bag = list.filter(it => !it[2].equipped);
-    const opt = it => [String(state.items.indexOf(it)), it[0] + (it[2].combat.length ? ' · ⚔ ' + pendingOf(it[2]) : '')];
-    if (equipped.length) options.push(['Equipados', equipped.map(opt)]);
-    if (bag.length) options.push(['Na bolsa', bag.map(opt)]);
+    for (const g of ['Equipados', 'Arsenal maldito', 'Na bolsa']) {
+      const group = list.map((e, k) => [e, k]).filter(([e]) => e.group === g);
+      if (group.length) options.push([g, group.map(([e, k]) => [String(k), e.name + (e.meta.combat.length ? ' · ⚔ ' + pendingOf(e.meta) : '')])]);
+    }
     options.push(['Simulação', [['free', 'Equipamento avulso (não salva)']]]);
     const top = el('div', undefined, 'calc-top');
-    const pick = select(options, calcTarget === 'free' ? 'free' : String(state.items.indexOf(calcTarget)), v => { calcTarget = v === 'free' ? 'free' : state.items[Number(v)]; renderCalc(); }, 'Equipamento');
+    const current = list.find(e => e.meta === calcTarget);
+    const pick = select(options, calcTarget === 'free' ? 'free' : String(list.indexOf(current)), v => { calcTarget = v === 'free' ? 'free' : list[Number(v)].meta; renderCalc(); }, 'Equipamento');
     pick.dataset.fk = 'pick';
     top.append(wrap('Equipamento', pick));
     const isFree = calcTarget === 'free';
-    const meta = isFree ? free : calcTarget[2];
+    const meta = isFree ? free : calcTarget;
     if (isFree) {
       const g = select(gearOptions(false), free.gear, v => { free.gear = v; free.pd = info(free).max; free.combat = []; renderCalc(); }, 'Tipo');
       g.dataset.fk = 'free-gear';
@@ -510,7 +599,10 @@
     now.append(meterEl(meta, i), el('span', i.label + ' · ' + i.rarity.label + ' · ' + meta.pd + '/' + i.max + ' PD · ' + STATE_LABEL[stNow]));
     calc.append(now);
 
-    const persist = () => { if (!isFree) { save(); renderList(); if (state.items[selected] === calcTarget) renderItemDetail(); } renderCalc(); };
+    const persist = () => {
+      if (!isFree) { save(); renderList(); if (state.items[selected]?.[2] === meta) renderItemDetail(); if (current?.group === 'Arsenal maldito') renderArsenal(); }
+      renderCalc();
+    };
     const events = el('div', undefined, 'calc-events');
     events.setAttribute('role', 'group');
     events.setAttribute('aria-label', 'Acontecimentos do combate');
@@ -596,13 +688,13 @@
       const apply = el('button', 'Encerrar combate · aplicar −' + lost + ' PD', 'red');
       apply.dataset.fk = 'apply';
       apply.disabled = !meta.combat.length;
-      apply.onclick = () => { const text = endCombat(calcTarget); save(); renderItems(); rollResult('Fim do combate', '−' + lost + ' PD', text); };
+      apply.onclick = () => { const text = endCombat(current); save(); refresh(); rollResult('Fim do combate', '−' + lost + ' PD', text); };
       actions.append(apply);
-      const pending = list.filter(it => it[2].combat.length);
+      const pending = list.filter(e => e.meta.combat.length);
       if (pending.length > 1) {
         const all = el('button', 'Encerrar para todos (' + pending.length + ' itens)');
         all.dataset.fk = 'apply-all';
-        all.onclick = () => { const lines = pending.map(endCombat); save(); renderItems(); rollResult('Fim do combate', pending.length + ' itens', lines.join(' · ')); };
+        all.onclick = () => { const lines = pending.map(endCombat); save(); refresh(); rollResult('Fim do combate', pending.length + ' itens', lines.join(' · ')); };
         actions.append(all);
       }
     }
@@ -699,17 +791,18 @@
     const short = /Descanso curto concluído/.test(text), long = /Descanso longo concluído/.test(text);
     if (!short && !long) return;
     let changed = false;
-    state.items.forEach(item => {
-      const m = item[2];
+    const metas = [...state.items.map(item => item[2]), ...(state.cursedWeapons || []).map(w => w.dur)];
+    metas.forEach(m => {
       if (!m) return;
       if (m.maintShort) { m.maintShort = false; changed = true; }
       if (long && m.maintLong) { m.maintLong = false; changed = true; }
     });
     if (!changed) return;
     try { localStorage.setItem(key, JSON.stringify(state)); } catch {}
-    renderItemDetail();
+    renderItemDetail(); renderArsenal();
   }).observe($('#saved'), { childList: true, characterData: true, subtree: true });
 
   renderItems();
-  save();
+  /* espera os outros módulos (Habakiri) montarem os cartões do Arsenal */
+  setTimeout(() => { renderArsenal(); renderCalc(); save(); });
 })();

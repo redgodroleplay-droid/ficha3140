@@ -8,7 +8,7 @@ try {
 function savePresentation() {
   try { localStorage.setItem(preferencesKey, JSON.stringify(presentation)); } catch {}
 }
-audio.volume = typeof presentation.volume === 'number' ? Math.min(1, Math.max(0, presentation.volume)) : 0.4;
+audio.volume = typeof presentation.volume === 'number' ? Math.min(1, Math.max(0, presentation.volume)) : 0.15;
 audio.muted = Boolean(presentation.muted);
 $('#music-volume').value = audio.volume;
 $('#intro-auto').checked = presentation.auto !== false;
@@ -22,10 +22,26 @@ function updateAudio() {
 async function toggleAudio() {
   if (!audio.paused) {
     audio.pause();
+    presentation.autoplay = false;
+    savePresentation();
     return;
   }
+  presentation.autoplay = true;
+  savePresentation();
   try { await audio.play(); } catch { $('#saved').textContent = 'Não foi possível reproduzir a trilha.'; }
 }
+/* Trilha sempre ligada, em volume baixo: o navegador só libera o som depois
+   da primeira interação, então tenta já e, se for bloqueado, no primeiro clique
+   ou tecla. Pausar pelo botão desliga isso até tocar de novo. */
+function startAmbient() {
+  if (presentation.autoplay === false || !audio.paused) return;
+  audio.preload = 'auto';
+  audio.play().then(stopWaiting, () => {});
+}
+const gestures = ['pointerdown', 'keydown', 'touchstart'];
+function stopWaiting() { gestures.forEach(type => document.removeEventListener(type, startAmbient, true)); }
+gestures.forEach(type => document.addEventListener(type, startAmbient, true));
+startAmbient();
 for (const event of ['play', 'pause', 'volumechange']) audio.addEventListener(event, updateAudio);
 $('#music-play').onclick = $('#intro-audio').onclick = toggleAudio;
 $('#music-mute').onclick = () => { audio.muted = !audio.muted; presentation.muted = audio.muted; savePresentation(); };

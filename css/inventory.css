@@ -77,6 +77,10 @@
 .detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 #add-item select{min-height:44px;max-width:240px}
 
+/* Durabilidade nos cartões do Arsenal maldito */
+.cursed .cursed-dur{margin:18px 0 4px;padding:14px 16px 12px;border:1px solid var(--line);border-left:3px solid var(--pd,var(--line-2));border-radius:3px;background:#0d0a0acc}
+.cursed .cursed-dur .eyebrow{margin:0}
+
 /* Calculadora */
 .wear-calc,.wear-tools{margin-top:18px}
 .calc-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0 12px}
