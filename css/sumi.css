@@ -1,0 +1,95 @@
+/* =========================================================
+   Sumi-e: pinceladas, ensō, hanko, magma da Shodhoruan,
+   sangue da Habakiri, corda shimenawa e pétalas em SVG.
+   As pinceladas são máscaras: a cor continua vindo do tema
+   (vermelho normal, laranja com o selo aberto, aura da arma).
+   ========================================================= */
+
+/* ---------- Pinceladas nos cartões ---------- */
+.card::before{
+  top:-5px;height:9px;border-radius:0;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 16' preserveAspectRatio='none'%3E%3Cpath d='M0 8C30 3 90 2 170 4C250 5 330 6 400 8C340 10 260 11 170 12C90 13 30 13 0 10Z'/%3E%3Cpath d='M20 5C80 3 150 3 230 4' stroke='%23000' stroke-width='1' fill='none' opacity='.5'/%3E%3Cpath d='M180 13C240 13 300 12 360 10' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Ccircle cx='388' cy='3' r='1.4'/%3E%3Ccircle cx='396' cy='12' r='1'/%3E%3C/svg%3E") left/100% 100% no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 16' preserveAspectRatio='none'%3E%3Cpath d='M0 8C30 3 90 2 170 4C250 5 330 6 400 8C340 10 260 11 170 12C90 13 30 13 0 10Z'/%3E%3Cpath d='M20 5C80 3 150 3 230 4' stroke='%23000' stroke-width='1' fill='none' opacity='.5'/%3E%3Cpath d='M180 13C240 13 300 12 360 10' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Ccircle cx='388' cy='3' r='1.4'/%3E%3Ccircle cx='396' cy='12' r='1'/%3E%3C/svg%3E") left/100% 100% no-repeat;
+}
+/* golpe de pincel seco no canto inferior (só em cartões sem desenho próprio no ::after) */
+.card:not(.cursed):not(.custom-record)::after{
+  content:"";position:absolute;right:14px;bottom:-4px;width:min(140px,40%);height:10px;pointer-events:none;opacity:.55;
+  background:linear-gradient(270deg,var(--shu),transparent);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M200 6C150 3 90 3 20 6C60 8 120 10 200 9Z'/%3E%3Cpath d='M190 11C140 12 90 12 40 11' stroke='%23fff' stroke-width='.9' fill='none'/%3E%3Cpath d='M180 2C130 1 80 2 50 3' stroke='%23fff' stroke-width='.6' fill='none'/%3E%3Ccircle cx='8' cy='5' r='1.3'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M200 6C150 3 90 3 20 6C60 8 120 10 200 9Z'/%3E%3Cpath d='M190 11C140 12 90 12 40 11' stroke='%23fff' stroke-width='.9' fill='none'/%3E%3Cpath d='M180 2C130 1 80 2 50 3' stroke='%23fff' stroke-width='.6' fill='none'/%3E%3Ccircle cx='8' cy='5' r='1.3'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+}
+
+/* pincelada mais rica sob o título da seção, com respingos */
+.section-title::after{
+  height:22px;width:min(380px,78%);background:var(--shu);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M2 12C40 5 120 3 230 5C300 6 360 8 396 9C380 13 330 15 250 16C160 18 70 19 6 18Z'/%3E%3Cpath d='M10 9C90 6 170 6 260 7' stroke='%23000' stroke-width='1.2' fill='none'/%3E%3Cpath d='M30 15C120 15 210 14 320 12' stroke='%23000' stroke-width='.8' fill='none'/%3E%3Ccircle cx='392' cy='4' r='1.8'/%3E%3Ccircle cx='384' cy='19' r='1.2'/%3E%3Ccircle cx='398' cy='15' r='.9'/%3E%3Ccircle cx='372' cy='2' r='.8'/%3E%3C/svg%3E") left/100% 100% no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M2 12C40 5 120 3 230 5C300 6 360 8 396 9C380 13 330 15 250 16C160 18 70 19 6 18Z'/%3E%3Cpath d='M10 9C90 6 170 6 260 7' stroke='%23000' stroke-width='1.2' fill='none'/%3E%3Cpath d='M30 15C120 15 210 14 320 12' stroke='%23000' stroke-width='.8' fill='none'/%3E%3Ccircle cx='392' cy='4' r='1.8'/%3E%3Ccircle cx='384' cy='19' r='1.2'/%3E%3Ccircle cx='398' cy='15' r='.9'/%3E%3Ccircle cx='372' cy='2' r='.8'/%3E%3C/svg%3E") left/100% 100% no-repeat;
+}
+
+/* ---------- Pétalas de sakura em SVG ---------- */
+.weather .petal,.banner-wind i{
+  border-radius:0;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 24'%3E%3Cpath d='M10 23C4 19 1 13 2 8C3 3 7 1 9 4L10 6L11 4C13 1 17 3 18 8C19 13 16 19 10 23Z'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 24'%3E%3Cpath d='M10 23C4 19 1 13 2 8C3 3 7 1 9 4L10 6L11 4C13 1 17 3 18 8C19 13 16 19 10 23Z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.weather .petal{width:11px;height:13px;background:linear-gradient(160deg,#ffb3c4,var(--shu))}
+.banner-wind i{width:9px;height:11px}
+
+/* ---------- Ensō atrás do nome ---------- */
+.identity{isolation:isolate}
+.enso{position:absolute;left:-34px;top:-26px;z-index:-1;width:clamp(170px,22vw,280px);aspect-ratio:1;pointer-events:none;opacity:.42;transform:rotate(-14deg)}
+.enso svg{width:100%;height:100%;overflow:visible}
+.enso .stroke{fill:none;stroke:var(--shu);stroke-linecap:round;stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+.enso .dry{fill:none;stroke:var(--shu);stroke-linecap:round;opacity:.5;stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+.enso.drawn .stroke,.enso.drawn .dry{transition:stroke-dashoffset 1.8s cubic-bezier(.6,.05,.3,1);stroke-dashoffset:0}
+.enso.drawn .dry{transition-delay:.15s}
+.enso circle{fill:var(--shu)}
+@media (max-width:760px){.enso{left:-18px;top:-10px;width:150px}}
+
+/* ---------- Hanko (carimbo) nos títulos ---------- */
+.section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.hanko{flex:none;width:clamp(58px,6vw,78px);aspect-ratio:1;margin-bottom:6px;transform:rotate(-7deg);opacity:.92;pointer-events:none;filter:drop-shadow(0 2px 3px #0008)}
+.hanko svg{width:100%;height:100%;overflow:visible}
+.hanko .ink{fill:var(--shu)}
+.hanko text{font-family:var(--jp);font-weight:800;fill:#f5eee1}
+.hanko.stamp{animation:hanko-stamp .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes hanko-stamp{0%{transform:rotate(-7deg) scale(1.6);opacity:0}60%{opacity:1}100%{transform:rotate(-7deg) scale(1)}}
+
+/* ---------- Fissuras de magma (selo da Shodhoruan aberto) ---------- */
+.magma{position:fixed;inset:0;z-index:25;pointer-events:none;opacity:0;transition:opacity 1.2s ease;contain:strict}
+.magma svg{position:absolute;inset:0;width:100%;height:100%}
+.magma .crack{fill:none;stroke:#ff6a1a;stroke-linecap:round;stroke-linejoin:round}
+.magma .core{fill:none;stroke:#ffe1a8;stroke-linecap:round;stroke-linejoin:round}
+.magma .glow{position:absolute;inset:0;filter:drop-shadow(0 0 6px #ff4a0a) drop-shadow(0 0 16px #ff3d00aa)}
+.magma .pulse{position:absolute;inset:0;animation:magma-pulse 2.6s ease-in-out infinite;will-change:opacity}
+@keyframes magma-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+body.mood-seal .magma{opacity:1}
+body.effects-off .magma .pulse{animation:none}
+
+/* ---------- Sangue da Habakiri (desembainhada) ---------- */
+.hk-blood{position:absolute;left:0;right:0;top:0;height:120px;z-index:3;pointer-events:none;overflow:hidden;border-radius:3px 3px 0 0}
+.hk-blood svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+.hk-blood .run{fill:#8f0a1d;transform-box:fill-box;transform-origin:top;animation:blood-run var(--t) cubic-bezier(.5,0,.6,1) var(--d) both}
+.hk-blood .shine{fill:#ff4d63;opacity:.5}
+@keyframes blood-run{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.hk-drop{position:absolute;top:var(--y);left:var(--x);width:5px;height:7px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#a80d22;box-shadow:inset -1px -1px 0 #ff4d6366;opacity:0;animation:blood-drop var(--t) cubic-bezier(.55,0,1,.45) var(--d) infinite;will-change:transform,opacity}
+@keyframes blood-drop{0%{opacity:0;transform:translateY(0)}8%{opacity:1}100%{opacity:0;transform:translateY(420px)}}
+body.effects-off .hk-drop{display:none}
+
+/* ---------- Corda shimenawa com shide ---------- */
+.shide{position:fixed;top:72px;right:clamp(16px,9vw,150px);z-index:28;width:96px;pointer-events:none;filter:drop-shadow(0 5px 6px #000b)}
+/* na ponta direita da vara do estandarte */
+.crest-banner .shide{position:absolute;top:-12px;right:-8px;left:auto;bottom:auto;z-index:4;width:80px}
+.crest-banner .shide svg{width:80px}
+.shide svg{display:block;width:96px;height:auto;overflow:visible}
+.shide-swing,.shide-paper{will-change:transform}
+.shide-hit{position:absolute;left:20px;right:20px;top:40px;height:46px;padding:0;border:0;border-radius:20px;background:none;pointer-events:auto;cursor:grab}
+.shide-hit:focus-visible{outline:2px solid var(--kin);outline-offset:-4px}
+@media (max-width:980px){
+  /* estandarte vira faixa: a corda pende do cabeçalho, à direita, só decorativa (não recebe toque) */
+  .shide{position:fixed;top:70px;bottom:auto;right:4px;left:auto;width:52px;z-index:29;opacity:.95}
+  .shide svg{width:52px}
+  .shide-hit{display:none}
+}
+@media print{.magma,.shide,.hk-blood,.hanko,.enso{display:none!important}}
+@media (prefers-reduced-motion:reduce){.enso .stroke,.enso .dry{stroke-dashoffset:0}.magma .pulse,.hk-drop{animation:none}}
