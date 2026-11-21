@@ -2,7 +2,7 @@
   const root = $('#progression');
   const headings = ['Disciplina', 'Lâmina', 'Selo de Shodhoruan', 'Personalizadas'];
   const defaultsByBranch = [
-    [0, 1, 4, 6].map(index => abilities[index]),
+    null, // Disciplina: vem de state.traits (js/pericias.js), editável e removível
     [2, 3, 5].map(index => abilities[index]),
     [['Manifestação', 'MARCADOR NARRATIVO', $('#besta .beast-panel p:nth-of-type(2)').textContent]],
     []
@@ -150,7 +150,9 @@
     map.append(trunk);
     const items = [];
     headings.forEach((branch, branchIndex) => {
-      const entries = branchIndex === 3
+      const entries = branchIndex === 0
+        ? (state.traits || []).map((entry, index) => ({entry, key:'trait-' + index, custom:true, badge:entry.category}))
+        : branchIndex === 3
         ? state.customAbilities.map((entry, index) => ({entry, key:'custom-' + index, custom:true, badge:entry.category}))
         : defaultsByBranch[branchIndex].map(([title, badge, text]) => ({
           entry: state.skillNotes.find(entry => entry.title === title && entry.text === text) || {title,text},
@@ -166,7 +168,7 @@
         item.branch = branch;
         items.push(item);
         const button = el('button', undefined, 'skill-node');
-        const glyphs = {'Segredos da cidade':'歩','Mente afiada':'心','Alerta':'眼','Paranoico':'影','Armas brancas':'刀','Luta contra a desonra':'誉','Experiência oriental':'葉','Manifestação':'封'};
+        const glyphs = {'Segredos da cidade':'歩','Mente afiada':'心','Observador':'察','Alerta':'眼','Paranoico':'影','Armas brancas':'刀','Luta contra a desonra':'誉','Experiência oriental':'葉','Manifestação':'封'};
         const glyph = el('span', glyphs[item.entry.title] || '技', 'skill-orb');
         glyph.setAttribute('aria-hidden', 'true');
         button.append(glyph, el('span', item.entry.title || 'Sem título', 'skill-node-label'));

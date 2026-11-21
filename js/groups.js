@@ -10,7 +10,7 @@
 
   const GROUPS = [
     { id: 'pessoa', kanji: '人', label: 'Personagem', tabs: ['ficha', 'historia', 'relacoes', 'titulos', 'besta'] },
-    { id: 'combate', kanji: '戦', label: 'Combate', tabs: ['tecnicas', 'habilidades', 'skilltree'] },
+    { id: 'combate', kanji: '戦', label: 'Combate', tabs: ['tecnicas', 'habilidades', 'grimorios', 'skilltree'] },
     { id: 'equipo', kanji: '装', label: 'Equipamento', tabs: ['inventario', 'arsenal'] },
     { id: 'registro', kanji: '記', label: 'Diário', tabs: ['diario', 'custom-topic'] }
   ];
