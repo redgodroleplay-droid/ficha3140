@@ -1,0 +1,128 @@
+/* =========================================================
+   月の呼吸 — Temática "Lua crescente" (roxo, estilo Kokushibo)
+   Ativada por body.theme-lua (js/lua.js). Carregar depois de urushi.css.
+   Roxo profundo no lugar do vermelhão, luar lilás no lugar do ouro,
+   lua crescente ao fundo, lâminas em meia-lua flutuando e um toque
+   carmesim (os olhos) em poucos detalhes.
+   Os temas por estado (selo, fera) continuam tendo prioridade.
+   ========================================================= */
+body.theme-lua{
+  --sumi:#08060b;
+  --urushi:#110d16;
+  --urushi-2:#18131f;
+  --urushi-3:#231b2e;
+  --washi:#f1ecf7;
+  --washi-2:#d4cbe0;
+  --ash:#a297b3;
+  --line:#2f2639;
+  --line-2:#4b3d5e;
+  --laca:#1e1029;
+  --lua-eye:#e0283f;       /* carmesim dos olhos */
+  --lua-eye-glow:#e0283f66;
+}
+body.theme-lua:not(.mood-seal):not(.mood-fera){
+  --shu:#9a4dff;           /* roxo da lua */
+  --shu-hi:#c7a2ff;
+  --shu-deep:#4b1d80;
+  --kin:#bfaee6;           /* luar lilás */
+  --kin-dim:#6f5e97;
+  --kin-hi:#ece4ff;
+  --kin-glow:#a57cff66;
+}
+
+/* ---------- Céu: lua crescente + lâminas em meia-lua ---------- */
+.lua-sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;display:none}
+.theme-lua .lua-sky{display:block}
+.lua-moon{position:absolute;top:clamp(70px,9vw,120px);right:clamp(-40px,4vw,90px);width:clamp(180px,24vw,340px);aspect-ratio:1;
+  border-radius:50%;
+  /* a sombra deslocada recorta o disco e deixa só a meia-lua */
+  box-shadow:inset clamp(-26px,-3vw,-16px) clamp(10px,1.4vw,18px) 0 0 #e9ddff;
+  filter:drop-shadow(0 0 22px #a57cffaa) drop-shadow(0 0 70px #7b3cff55);
+  transform:rotate(-18deg);opacity:.5}
+.lua-halo{position:absolute;inset:0;background:
+  radial-gradient(ellipse 55% 45% at 82% 12%,#7b3cff26,transparent 65%),
+  radial-gradient(ellipse 70% 50% at 0% 100%,#4b1d8030,transparent 70%)}
+.lua-blades i{position:absolute;left:var(--x);top:var(--y);width:var(--size);aspect-ratio:1;border-radius:50%;
+  box-shadow:inset calc(var(--size) * -.18) calc(var(--size) * .08) 0 0 #d9c7ff;
+  transform:rotate(var(--rot));opacity:var(--o);filter:drop-shadow(0 0 4px #a57cff)}
+@media (prefers-reduced-motion:no-preference){
+  .theme-lua .lua-blades i{animation:lua-drift var(--time) ease-in-out var(--delay) infinite alternate}
+  .theme-lua .lua-moon{animation:lua-glow 7s ease-in-out infinite}
+}
+@keyframes lua-drift{to{transform:translate(var(--dx),var(--dy)) rotate(calc(var(--rot) + 40deg));opacity:calc(var(--o) * .35)}}
+@keyframes lua-glow{50%{filter:drop-shadow(0 0 30px #b98cffcc) drop-shadow(0 0 90px #7b3cff77)}}
+.effects-off .lua-blades{display:none}
+
+/* fundo: paisagem sumi-e tingida de roxo, sem o brilho vermelho */
+body.theme-lua::before{
+  background:
+    radial-gradient(ellipse 80% 60% at 78% 8%,#7b3cff1f,transparent 60%),
+    linear-gradient(180deg,#08060b90 0%,#08060b 72%),
+    url("../assets/images/sumi-landscape.png") center 30%/cover;
+  filter:grayscale(1) contrast(1.15) sepia(.35) hue-rotate(225deg);opacity:.4}
+.theme-lua ::selection{background:#7b3cff;color:#fff}
+
+/* ---------- Controles ---------- */
+.theme-lua button,.theme-lua select{background:#17111d}
+.theme-lua .toolbar button,.theme-lua .utility #print{background:linear-gradient(180deg,#211829,#120d17)}
+.theme-lua nav button.active,.theme-lua nav button[aria-current]{background:linear-gradient(0deg,#9a4dff24,transparent 75%)}
+.theme-lua .topic-menu-list button.active,.theme-lua .topic-row.drop-target{background:#9a4dff1f}
+.theme-lua .chapter-list .active{background:#9a4dff1c}
+.theme-lua .book-index button.active{background:#9a4dff26}
+
+/* ---------- Cabeçalho ---------- */
+.theme-lua .masthead{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20' fill='none' stroke='%23bfaee6' stroke-width='.6' opacity='.09'%3E%3Cpath d='M0 20a20 20 0 0 1 40 0M6 20a14 14 0 0 1 28 0M12 20a8 8 0 0 1 16 0M-20 10a20 20 0 0 1 40 0M-14 10a14 14 0 0 1 28 0M-8 10a8 8 0 0 1 16 0M20 10a20 20 0 0 1 40 0M26 10a14 14 0 0 1 28 0M32 10a8 8 0 0 1 16 0'/%3E%3C/svg%3E") 0 0/40px 20px,
+    linear-gradient(180deg,#110b17f7,#09070cf2)}
+.theme-lua:not(.mood-seal):not(.mood-fera) .masthead::after{background:linear-gradient(90deg,transparent,var(--shu-deep) 12%,var(--kin) 50%,var(--shu-deep) 88%,transparent)}
+.theme-lua nav.grouped .nav-groups button i{background:#17111d}
+.theme-lua nav.grouped .nav-groups button.active{border-color:#bfaee655;background:linear-gradient(180deg,#4b1d8066,#1e102900);box-shadow:inset 0 1px 0 #bfaee633}
+.theme-lua nav.grouped .nav-groups button.active i{box-shadow:inset 0 0 0 2px #08060b55,0 0 14px #9a4dff77}
+
+/* ---------- Estandarte e identidade ---------- */
+.theme-lua:not(.mood-seal) .crest-cloth{background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 4px),radial-gradient(ellipse at 50% 55%,#4b1d8066,transparent 65%),linear-gradient(100deg,#1a1222,#0c0910 50%,#1c1224)}
+.theme-lua .crest-cloth::before{border-color:#bfaee640}
+.theme-lua .crest-script{text-shadow:0 0 30px #9a4dff66}
+.theme-lua:not(.mood-seal) .crest-mark{filter:drop-shadow(0 0 12px #9a4dff88) drop-shadow(0 0 3px var(--lua-eye-glow))}
+.theme-lua:not(.mood-seal):not(.mood-cursed) .identity::after{-webkit-text-stroke-color:#9a4dff45}
+.theme-lua .identity-tags span{background:#bfaee60f}
+
+/* ---------- Barras, atributos e árvore ---------- */
+.theme-lua:not(.mood-seal):not(.mood-fera) .bar i{background:linear-gradient(90deg,var(--shu-deep),var(--shu) 65%,#d46bff);box-shadow:0 0 14px #9a4dff99}
+.theme-lua .attr::before{color:#9a4dff1c}
+.theme-lua .attr button{border-color:#4b1d80;background:#9a4dff14}
+.theme-lua .session-health button:first-of-type{border-color:#4b1d80}
+.theme-lua .skill-node[aria-pressed=true] .skill-orb{background:radial-gradient(circle at 35% 30%,#c08bff,#5a23a0);border-color:#e0ccff;box-shadow:0 0 0 4px #9a4dff33,0 0 26px #9a4dffaa}
+.theme-lua .skill-trunk svg{filter:drop-shadow(0 0 10px #a57cff44)}
+.theme-lua #gold{background:#bfaee612}
+
+/* ---------- Cartões: metal lilás e cortes em meia-lua ---------- */
+/* :where() mantém a especificidade baixa, para não cobrir cartões com fundo próprio (mana, armas) */
+:where(.theme-lua) .card{background:linear-gradient(160deg,#1a1520f2,#0f0c13f2)}
+:where(.theme-lua) .health{background:linear-gradient(160deg,#231530f2,#100c14f2)}
+:where(.theme-lua) .entity{background:linear-gradient(110deg,#231530f2,#0f0c13f2 60%)}
+.theme-lua .dice-fab{box-shadow:0 10px 30px #9a4dff66,0 0 0 4px #08060b,0 0 0 5px #9a4dff66}
+.theme-lua .card>.kanagu{box-shadow:inset 0 0 0 1px #bfaee612}
+/* rebites carmesins: os "olhos" */
+.theme-lua .card>.kanagu::before{
+  background:
+    radial-gradient(circle,var(--lua-eye) 0 1.6px,transparent 2.2px) 3px 3px/8px 8px no-repeat,
+    radial-gradient(circle,var(--lua-eye) 0 1.6px,transparent 2.2px) calc(100% - 3px) 3px/8px 8px no-repeat,
+    radial-gradient(circle,var(--kin-hi) 0 1.6px,transparent 2.2px) 3px calc(100% - 3px)/8px 8px no-repeat,
+    radial-gradient(circle,var(--kin-hi) 0 1.6px,transparent 2.2px) calc(100% - 3px) calc(100% - 3px)/8px 8px no-repeat}
+/* no lugar da fissura de kintsugi: um corte curvo com meias-luas soltas */
+.theme-lua .card>.kanagu::after{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80' fill='none' stroke-linecap='round'%3E%3Cpath d='M118 6C92 10 52 26 22 62' stroke='%23c7a2ff' stroke-width='1.4'/%3E%3Cpath d='M112 16C90 22 62 36 40 60' stroke='%23bfaee6' stroke-width='.7' opacity='.7'/%3E%3Cpath d='M70 44a7 7 0 1 0 9 -9a5.5 5.5 0 1 1 -9 9z' fill='%23e4d8ff' stroke='none' opacity='.85'/%3E%3Cpath d='M96 30a4.5 4.5 0 1 0 6 -6a3.5 3.5 0 1 1 -6 6z' fill='%23e4d8ff' stroke='none' opacity='.7'/%3E%3Cpath d='M36 62a3.5 3.5 0 1 0 4.5 -4.5a2.7 2.7 0 1 1 -4.5 4.5z' fill='%23e4d8ff' stroke='none' opacity='.6'/%3E%3C/svg%3E") center/contain no-repeat}
+.theme-lua .card.mana-card>.kanagu{--kin:#8fa2e8;--kin-hi:#c9d3ff}
+.theme-lua .card.cursed>.kanagu{--kin:#b4573f;--kin-hi:#ff9a7a}
+
+/* ---------- Intro ---------- */
+.theme-lua .gate,.theme-lua .gate-right{border-color:#bfaee655}
+.theme-lua #intro-start span{box-shadow:inset 0 0 0 3px #0006,inset 0 0 0 6px #fff4,0 0 40px #9a4dff88}
+.theme-lua #intro-start:hover span{box-shadow:inset 0 0 0 3px #0006,inset 0 0 0 6px #fff4,0 0 60px #9a4dffcc}
+
+@media (max-width:760px){
+  .lua-moon{top:120px;right:-60px;width:180px;opacity:.35}
+}
+@media print{.lua-sky{display:none!important}}
