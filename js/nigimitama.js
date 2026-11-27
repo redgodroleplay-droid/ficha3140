@@ -2,7 +2,7 @@
    和御魂 Nigimitama — Laço da Amizade (modo escondido)
    Magia de 2º círculo de um aliado que cria um vínculo com a Lucy.
    O modo fica escondido até ser descoberto:
-   - digitar "nigimitama" (ou "ninjatama") fora dos campos, ou
+   - digitar "nigimitama" (ou "nigitama" / "ninjatama") fora dos campos, ou
    - tocar 5 vezes seguidas no 生命 do cartão de Vitalidade.
    Depois disso aparece o botão 蓮, que abre o painel do laço com os
    benefícios que valem para a Lucy, e a ficha ganha o clima azul
@@ -306,7 +306,7 @@
   document.addEventListener('keydown', e => {
     if (typing(e.target) || e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
     buffer = (buffer + e.key.toLowerCase()).slice(-12);
-    if (buffer.endsWith('nigimitama') || buffer.endsWith('ninjatama')) { buffer = ''; unlock(); }
+    if (['nigimitama', 'nigitama', 'ninjatama'].some(w => buffer.endsWith(w))) { buffer = ''; unlock(); }
   });
   const life = document.querySelector('.health .card-label span');
   if (life) {
