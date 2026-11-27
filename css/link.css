@@ -1,0 +1,5 @@
+/* Salvamento por link (js/link.js) */
+.save-link-box{display:grid;gap:6px;margin-top:10px;text-align:left}
+.save-link-box[hidden]{display:none}
+.save-link-box input{width:100%;padding:6px 0;font-size:12px;color:var(--washi-2);text-overflow:ellipsis}
+.save-link-note{color:var(--ash);font-size:12px;line-height:1.45}
