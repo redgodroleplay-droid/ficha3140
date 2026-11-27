@@ -1,0 +1,109 @@
+/* =========================================================
+   和御魂 Nigimitama — Laço da Amizade (modo escondido)
+   Azul espiritual: anéis de luz, pétalas de lótus e flor brilhando.
+   Ativado por body.mood-nigi (js/nigimitama.js).
+   ========================================================= */
+:root{--nigi:#6f8dff;--nigi-hi:#c5d2ff;--nigi-deep:#24307a;--nigi-glow:#7b95ff88}
+
+/* ---------- botão 蓮 ---------- */
+.nigi-fab{position:fixed;z-index:25;right:max(22px,env(safe-area-inset-right));bottom:calc(max(22px,env(safe-area-inset-bottom)) + 118px);
+  display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 14px 4px 5px;border:1px solid var(--line-2);border-radius:24px;
+  background:#0c0d16e6;backdrop-filter:blur(6px);color:var(--washi-2);font-size:12.5px;font-weight:600;letter-spacing:.06em;box-shadow:0 8px 22px #0009}
+.nigi-fab[hidden]{display:none}
+.nigi-fab b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#141a33;font:700 16px var(--jp);color:var(--nigi-hi)}
+.nigi-fab:hover{border-color:var(--nigi);color:#fff;background:#10142ae6}
+.nigi-fab.on{border-color:var(--nigi);color:#fff;background:#121a3ce6}
+.nigi-fab.on b{background:var(--nigi);color:#fff;box-shadow:0 0 16px var(--nigi)}
+@media (prefers-reduced-motion:no-preference){.nigi-fab.on b{animation:nigi-pulse 2.6s ease-in-out infinite}}
+@keyframes nigi-pulse{50%{box-shadow:0 0 26px var(--nigi),0 0 4px #fff}}
+
+/* ---------- clima do laço ---------- */
+.nigi-layer,.nigi-petals{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity 1s var(--ease)}
+.nigi-layer{z-index:-1;overflow:hidden}
+.nigi-petals{z-index:41;overflow:hidden}
+.mood-nigi .nigi-layer,.mood-nigi .nigi-petals{opacity:1}
+.mood-nigi .nigi-layer{background:
+  radial-gradient(ellipse 60% 45% at 50% 105%,#4d6bff33,transparent 70%),
+  radial-gradient(ellipse 50% 40% at 85% 5%,#7b95ff22,transparent 65%)}
+/* anéis de luz que envolvem a tela, como o laço da ilustração */
+.nigi-ring{position:absolute;left:50%;top:55%;width:150vmax;height:38vmax;margin:-19vmax 0 0 -75vmax;border-radius:50%;
+  border:1.5px solid #9fb2ff55;box-shadow:0 0 18px #6f8dff55,inset 0 0 18px #6f8dff33;transform:rotate(-14deg)}
+.nigi-ring.b{width:120vmax;height:30vmax;margin:-15vmax 0 0 -60vmax;transform:rotate(10deg);border-color:#c5d2ff40}
+.nigi-ring.c{width:90vmax;height:22vmax;margin:-11vmax 0 0 -45vmax;transform:rotate(-4deg);border-color:#9fb2ff30}
+@media (prefers-reduced-motion:no-preference){
+  .mood-nigi .nigi-ring.a{animation:nigi-orbit 14s ease-in-out infinite}
+  .mood-nigi .nigi-ring.b{animation:nigi-orbit 18s ease-in-out -6s infinite reverse}
+  .mood-nigi .nigi-ring.c{animation:nigi-orbit 11s ease-in-out -3s infinite}
+  .mood-nigi .nigi-petals i{animation:nigi-fall var(--time) linear var(--delay) infinite}
+}
+@keyframes nigi-orbit{50%{transform:rotate(6deg) scaleY(1.15);opacity:.6}}
+.nigi-petals i{position:absolute;left:var(--x);top:-20px;width:var(--size);height:calc(var(--size) * 1.6);border-radius:50% 50% 50% 50%/70% 70% 30% 30%;
+  background:radial-gradient(ellipse at 50% 30%,#eef2ff,#8fa4ff 55%,#4d6bff00 80%);box-shadow:0 0 8px #7b95ff;opacity:0}
+@keyframes nigi-fall{
+  0%{transform:translate(0,0) rotate(0);opacity:0}
+  10%{opacity:.85}
+  85%{opacity:.6}
+  100%{transform:translate(var(--drift),105vh) rotate(var(--spin));opacity:0}
+}
+.effects-off .nigi-petals{display:none}
+.mood-nigi .health,.mood-nigi .mana-card{box-shadow:0 0 0 1px #6f8dff44,0 0 26px #6f8dff22}
+.mood-nigi .health .card-label span{color:var(--nigi-hi);text-shadow:0 0 12px var(--nigi)}
+.mood-nigi .masthead::after{box-shadow:0 0 18px var(--nigi)}
+
+/* flor que desabrocha ao ativar/descobrir */
+.nigi-bloom{position:fixed;inset:0;z-index:70;display:none;place-content:center;justify-items:center;gap:10px;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,#6f8dff44,transparent 55%)}
+.nigi-bloom.go{display:grid;animation:nigi-bloom 2.4s var(--ease) forwards}
+.nigi-bloom b{font:800 clamp(90px,16vw,170px)/1 var(--jp);color:#eef2ff;text-shadow:0 0 30px var(--nigi),0 0 80px var(--nigi)}
+.nigi-bloom span{font:600 clamp(18px,2.4vw,26px) var(--serif);color:var(--nigi-hi);letter-spacing:.06em;text-shadow:0 0 14px #000}
+@keyframes nigi-bloom{0%{opacity:0;transform:scale(.7)}20%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.nigi-bloom.go{animation:nigi-bloom-calm 2s linear forwards}@keyframes nigi-bloom-calm{0%,80%{opacity:1}100%{opacity:0}}}
+
+/* ---------- painel ---------- */
+.nigi-dialog{width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 32px);text-align:left;border-color:#6f8dff66;
+  background:radial-gradient(ellipse 90% 40% at 80% 0%,#3a4cb033,transparent 70%),linear-gradient(170deg,#11131f,#0a0b12)}
+.nigi-head h2{color:#eef2ff;text-shadow:0 0 18px #6f8dff88}
+.nigi-kicker{display:block;font:600 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--nigi-hi)}
+.nigi-meta{margin:0;color:var(--ash);font-size:12.5px}
+.nigi-quote{margin:10px 0 14px;padding-left:12px;border-left:2px solid var(--nigi);font:italic 16px var(--serif);color:var(--nigi-hi)}
+.nigi-setup{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px 14px;margin-bottom:12px}
+.nigi-setup label{display:grid;gap:4px;font-size:11.5px;color:var(--ash);letter-spacing:.04em}
+.nigi-setup input,.nigi-setup select{width:100%;color:var(--washi)}
+.nigi-bond{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border:1px solid #6f8dff44;border-radius:3px;background:#141a3366}
+.nigi-start{border-color:var(--nigi);background:linear-gradient(180deg,#2a3a99,#18225e);color:#fff}
+.nigi-start:hover{background:linear-gradient(180deg,#3447b8,#1d2a72);border-color:var(--nigi-hi)}
+.nigi-hint{color:var(--ash);font-size:12px}
+.nigi-clock{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.nigi-clock b{font:600 34px/1 var(--serif);color:#eef2ff;text-shadow:0 0 12px var(--nigi)}
+.nigi-clock span{color:var(--nigi-hi);font-size:12.5px}
+.nigi-end{border-color:#8f1f14}
+.nigi-status{min-height:1.4em;margin:8px 0;color:var(--nigi-hi);font-size:13px}
+.nigi-buffs{display:grid;gap:10px}
+.nigi-buff{padding:10px 12px;border:1px solid var(--line-2);border-left:3px solid var(--nigi);border-radius:3px;background:#0e1018cc}
+.nigi-buff.spent{opacity:.62;border-left-color:var(--line-2)}
+.nigi-buff.locked{opacity:.45;border-left-style:dashed}
+.nigi-buff.nigi-violet{border-left-color:#a34dff;background:linear-gradient(90deg,#1c1028cc,#0e1018cc 60%)}
+.nigi-violet .nigi-glyph{border-color:#a34dff99;color:#e0c4ff;background:#24123a}
+.nigi-violet .nigi-tag{border-color:#a34dff77;color:#e0c4ff}
+.nigi-buff-head{display:flex;align-items:center;gap:10px}
+.nigi-buff-head h3{margin:0;font-size:19px}
+.nigi-glyph{display:grid;place-items:center;flex:none;width:30px;height:30px;border:1px solid #6f8dff88;border-radius:50%;font:700 15px var(--jp);font-style:normal;color:var(--nigi-hi);background:#141a33}
+.nigi-tag{margin-left:auto;padding:2px 9px;border:1px solid #6f8dff66;border-radius:20px;font-size:11px;color:var(--nigi-hi);white-space:nowrap}
+.nigi-buff.spent .nigi-tag,.nigi-buff.locked .nigi-tag{border-color:var(--line-2);color:var(--ash)}
+.nigi-rule{margin:6px 0 8px;font-size:13px;line-height:1.5;color:var(--washi-2)}
+.nigi-buff>input{width:100%}
+.nigi-actions{display:flex;flex-wrap:wrap;gap:8px}
+.nigi-actions input{width:84px;padding:6px 4px}
+.nigi-actions button{min-height:34px;padding:6px 12px;font-size:12.5px}
+.nigi-actions button:not(:disabled):hover{border-color:var(--nigi);color:#fff}
+.nigi-limits{margin-top:12px;color:var(--washi-2);font-size:13px}
+.nigi-limits summary{cursor:pointer;color:var(--nigi-hi);font-weight:600}
+.nigi-limits ul{margin:8px 0 0;padding-left:20px;display:grid;gap:4px}
+
+@media (max-width:620px){
+  .nigi-fab{padding:5px}
+  .nigi-fab span{display:none}
+  .nigi-setup{grid-template-columns:1fr 1fr}
+  .nigi-setup label:first-child{grid-column:1/-1}
+}
+@media print{.nigi-layer,.nigi-petals,.nigi-bloom,.nigi-fab{display:none!important}}
