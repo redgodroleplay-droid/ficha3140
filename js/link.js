@@ -23,28 +23,86 @@
   };
   const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
 
-  async function encode(json) {
-    const bytes = new TextEncoder().encode(json);
-    return canZip ? 'z.' + toB64(await pipe(bytes, new CompressionStream('deflate-raw'))) : 'j.' + toB64(bytes);
-  }
-  async function decode(payload) {
-    const [kind, body] = [payload.slice(0, 2), payload.slice(2)];
-    if (kind === 'z.') {
-      if (!canZip) throw Error('Este navegador não consegue abrir links comprimidos. Atualize-o ou use o JSON.');
-      return new TextDecoder().decode(await pipe(fromB64(body), new DecompressionStream('deflate-raw')));
+  const zip = async text => toB64(await pipe(new TextEncoder().encode(text), new CompressionStream('deflate-raw')));
+  const unzip = async body => {
+    if (!canZip) throw Error('Este navegador não consegue abrir links comprimidos. Atualize-o ou use o JSON.');
+    return new TextDecoder().decode(await pipe(fromB64(body), new DecompressionStream('deflate-raw')));
+  };
+
+  /* ---------- diferença em relação à ficha-base ----------
+     O link d1 só leva o que mudou em relação a assets/ficha-base-1.json
+     (a ficha como vem de fábrica). Esse arquivo NUNCA deve ser editado:
+     links antigos dependem dele. Se um dia precisar de outra base,
+     crie ficha-base-2.json e um prefixo d2, mantendo o d1 funcionando. */
+  const BASE_URL = 'assets/ficha-base-1.json';
+  const DEL = '~';     // chave apagada
+  const ARR = '#';     // array do mesmo tamanho, só com os índices que mudaram
+  const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  function diff(a, b) {
+    if (same(a, b)) return undefined;
+    if (isObj(a) && isObj(b)) {
+      const out = {};
+      for (const k of Object.keys(a)) { const d = diff(a[k], b[k]); if (d !== undefined) out[k] = d; }
+      for (const k of Object.keys(b)) if (!(k in a)) out[k] = { [DEL]: 1 };
+      return out;
     }
-    if (kind === 'j.') return new TextDecoder().decode(fromB64(body));
+    if (Array.isArray(a) && Array.isArray(b) && a.length === b.length) {
+      const out = { [ARR]: 1 };
+      a.forEach((v, i) => { const d = diff(v, b[i]); if (d !== undefined) out[i] = d; });
+      return out;
+    }
+    return a === undefined ? null : a;
+  }
+  const isDel = v => isObj(v) && Object.keys(v).length === 1 && v[DEL] === 1;
+  function patch(b, d) {
+    if (Array.isArray(b) && isObj(d) && d[ARR] === 1) {
+      const out = b.slice();
+      for (const k of Object.keys(d)) if (k !== ARR) out[Number(k)] = patch(b[Number(k)], d[k]);
+      return out;
+    }
+    if (isObj(b) && isObj(d) && !(ARR in d)) {
+      const out = { ...b };
+      for (const k of Object.keys(d)) { if (isDel(d[k])) delete out[k]; else out[k] = patch(b[k], d[k]); }
+      return out;
+    }
+    return d;
+  }
+  let baseCache = null;
+  const loadBase = async () => baseCache || (baseCache = fetch(BASE_URL, { cache: 'force-cache' }).then(r => {
+    if (!r.ok) throw Error('Não foi possível ler a ficha-base (' + r.status + ').');
+    return r.json();
+  }).catch(e => { baseCache = null; throw e; }));
+
+  async function encode(data, savedAt) {
+    if (!canZip) return 'j.' + toB64(new TextEncoder().encode(JSON.stringify({ format: 'ronin-ficha', version: 2, savedAt, data })));
+    try {
+      const d = diff(JSON.parse(JSON.stringify(data)), await loadBase()) || {}; // JSON tira os undefined, como no backup
+      return 'd1.' + await zip(JSON.stringify({ t: Math.round(Date.parse(savedAt) / 1000).toString(36), d }));
+    } catch {
+      return 'z.' + await zip(JSON.stringify({ format: 'ronin-ficha', version: 2, savedAt, data }));
+    }
+  }
+  /* devolve o backup no formato do "Importar JSON" */
+  async function decode(payload) {
+    if (payload.startsWith('d1.')) {
+      const { t, d } = JSON.parse(await unzip(payload.slice(3)));
+      const savedAt = t ? new Date(parseInt(t, 36) * 1000).toISOString() : undefined;
+      return { format: 'ronin-ficha', version: 2, savedAt, data: patch(structuredClone(await loadBase()), d || {}) };
+    }
+    if (payload.startsWith('z.')) return JSON.parse(await unzip(payload.slice(2)));
+    if (payload.startsWith('j.')) return JSON.parse(new TextDecoder().decode(fromB64(payload.slice(2))));
     throw Error('Link de ficha em formato desconhecido.');
   }
 
   const base = () => location.origin + location.pathname;
   async function buildLink() {
-    const backup = { format: 'ronin-ficha', version: 2, savedAt: new Date().toISOString(), data: state };
-    let link = base() + PREFIX + await encode(JSON.stringify(backup));
+    const savedAt = new Date().toISOString();
+    let link = base() + PREFIX + await encode(state, savedAt);
     let noImages = false;
     if (link.length > MAX_WITH_IMAGES && JSON.stringify(state).includes('data:image')) {
-      const slim = JSON.stringify(backup, (k, v) => (typeof v === 'string' && v.startsWith('data:image') ? '' : v));
-      link = base() + PREFIX + await encode(slim);
+      const slim = JSON.parse(JSON.stringify(state, (k, v) => (typeof v === 'string' && v.startsWith('data:image') ? '' : v)));
+      link = base() + PREFIX + await encode(slim, savedAt);
       noImages = true;
     }
     return { link, noImages };
@@ -56,7 +114,7 @@
     const payload = location.hash.slice(PREFIX.length);
     const clearHash = () => history.replaceState(null, '', base() + location.search);
     try {
-      const raw = JSON.parse(await decode(payload));
+      const raw = await decode(payload);
       const next = validateBackup(raw);
       if (!next.portrait && state.portrait) next.portrait = state.portrait; // retrato ficou fora do link
       const when = raw.savedAt ? ' (salva em ' + new Date(raw.savedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) + ')' : '';
